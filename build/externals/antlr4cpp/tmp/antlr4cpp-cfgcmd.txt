@@ -1,1 +1,0 @@
-cmd='/usr/local/Cellar/cmake/3.10.2/bin/cmake;-DCMAKE_BUILD_TYPE=Release;-DANTLR4CPP_JAR_LOCATION=/Users/tbourvon/Drive/Projects/Programming/HexaC/thirdparty/antlr-4.7.1-complete.jar;-DBUILD_SHARED_LIBS=ON;-BUILD_TESTS=OFF;-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>;-DCMAKE_SOURCE_DIR:PATH=<SOURCE_DIR>/runtime/Cpp;<SOURCE_DIR>/runtime/Cpp'
