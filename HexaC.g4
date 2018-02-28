@@ -2,17 +2,16 @@ grammar HexaC;
 
 // Terminals
 
-
 ID :
 KEYWORD :
 INT :
 CHAR :
-OPENPAR :
-CLOSEPAR :
-OPENBRACE :
-CLOSEBRACE :
-OPENBRACKET :
-CLOSEBRACKET :
+OPEN_PAR :
+CLOSE_PAR :
+OPEN_BRACE :
+CLOSE_BRACE :
+OPEN_BRACKET :
+CLOSE_BRACKET :
 SEMICOLON :
 STAR :
 PLUS :
@@ -20,6 +19,7 @@ DIV :
 MINUS :
 MOD :
 EQ :
+<<<<<<< HEAD
 PLUSEQ : >=
 MINUSEQ : <=
 DIVEQ : \/=
@@ -35,3 +35,26 @@ NOT : !
 PLUSPLUS : \+\+
 MINUSMINUS --
 COMMA : ,
+=======
+PLUS_EQ :
+MINUS_EQ :
+DIV_EQ :
+STAR_EQ :
+MOD_EQ :
+EQ_EQ :
+NOT_EQ :
+GT :
+LT :
+GE :
+LE :
+NOT :
+PLUS_PLUS :
+MINUS_MINUS :
+COMMA :
+AND_AND :
+OR_OR :
+
+
+// Rules
+
+>>>>>>> 7117fa0266458298df965288b55e714ba75b3ce7
