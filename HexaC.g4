@@ -2,59 +2,44 @@ grammar HexaC;
 
 // Terminals
 
-ID :
-KEYWORD :
-INT :
-CHAR :
-OPEN_PAR :
-CLOSE_PAR :
-OPEN_BRACE :
-CLOSE_BRACE :
-OPEN_BRACKET :
-CLOSE_BRACKET :
-SEMICOLON :
-STAR :
-PLUS :
-DIV :
-MINUS :
-MOD :
-EQ :
-<<<<<<< HEAD
-PLUSEQ : >=
-MINUSEQ : <=
-DIVEQ : \/=
-STAREQ : \*=
-MODEQ : %=
-EQEQ : ==
-NOTEQ : !=
+ID : [_a-zA-Z][_a-zA-Z0-9]{0,30}
+IF : if
+ELSE : else
+WHILE : while
+RETURN : return
+INT32_T : int32_t
+INT64_T : int64_t
+CHAR : char
+VOID : void
+INT : \d+
+CHAR : '\w'
+OPEN_PAR : \(
+CLOSE_PAR : \)
+OPEN_BRACE : \[
+CLOSE_BRACE : \]
+OPEN_BRACKET : {
+CLOSE_BRACKET : }
+SEMICOLON : ;
+STAR : \*
+PLUS : \+
+DIV : \/
+MINUS : -
+MOD : %
+EQ : =
+PLUS_EQ : >=
+MINUS_EQ : <=
+DIV_EQ : \/=
+STAR_EQ : \*=
+MOD_EQ : %=
+EQ_EQ : ==
+NOT_EQ : !=
 GT : >
 LT : <
 GE : >=
 LE : <=
 NOT : !
-PLUSPLUS : \+\+
-MINUSMINUS --
+PLUS_PLUS : \+\+
+MINUS_MINUS : --
 COMMA : ,
-=======
-PLUS_EQ :
-MINUS_EQ :
-DIV_EQ :
-STAR_EQ :
-MOD_EQ :
-EQ_EQ :
-NOT_EQ :
-GT :
-LT :
-GE :
-LE :
-NOT :
-PLUS_PLUS :
-MINUS_MINUS :
-COMMA :
-AND_AND :
-OR_OR :
-
 
 // Rules
-
->>>>>>> 7117fa0266458298df965288b55e714ba75b3ce7
