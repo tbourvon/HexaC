@@ -1,14 +1,28 @@
-# Specify the minimum version for CMake
+# minimum required CMAKE version
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 
-cmake_minimum_required(VERSION 2.8)
+LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 
-# Project's name
+# compiler must be 11 or 14
+SET (CMAKE_CXX_STANDARD 14)
 
-project(HexaC)
-# Set the output folder where your program will be created
-set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+# set variable pointing to the antlr tool that supports C++
+set(ANTLR4CPP_JAR_LOCATION ${PROJECT_SOURCE_DIR}/thirdparty/antlr-4.7.1-complete.jar)
+# add external build for antlrcpp
+include( ExternalAntlr4Cpp )
+# add antrl4cpp artifacts to project environment
+include_directories( ${ANTLR4CPP_INCLUDE_DIRS} )
+link_directories( ${ANTLR4CPP_LIBS} )
+message(STATUS "Found antlr4cpp libs: ${ANTLR4CPP_LIBS} and includes: ${ANTLR4CPP_INCLUDE_DIRS} ")
 
-# The following folder will be included
-include_directories("${PROJECT_SOURCE_DIR}")
+# Call macro to add lexer and grammar to your build dependencies.
+antlr4cpp_process_grammar(demo HexaC
+  ${CMAKE_CURRENT_SOURCE_DIR}/grammar/HexaCLexer.g4
+  ${CMAKE_CURRENT_SOURCE_DIR}/grammar/HexaCParser.g4)
+# include generated files in project environment
+include_directories(${antlr4cpp_include_dirs_HexaC})
+
+# add generated grammar to demo binary target
+add_executable(HexaC main.cpp ${HexaC})
+add_dependencies(HexaC antlr4cpp antlr4cpp_generation_HexaC)
+target_link_libraries(HexaC antlr4-runtime)
