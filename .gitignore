@@ -45,3 +45,6 @@ CTestTestfile.cmake
 
 # VSCode
 .vscode
+
+# ANTLR
+.antlr
