@@ -4,7 +4,7 @@
 
 # HexaC
 
-## Le projet de Tristan BOURVON
+### Le projet de Tristan BOURVON
 
 </div>
 
