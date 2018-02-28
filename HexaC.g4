@@ -29,8 +29,8 @@ EQEQ :
 NOTEQ :
 GT :
 LT :
-GET :
-LET :
+GE :
+LE :
 NOT :
 PLUSPLUS :
 MINUSMINUS :
