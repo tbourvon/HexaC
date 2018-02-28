@@ -20,18 +20,18 @@ DIV :
 MINUS :
 MOD :
 EQ :
-PLUSEQ :
-MINUSEQ :
-DIVEQ :
-STAREQ :
-MODEQ :
-EQEQ :
-NOTEQ :
-GT :
-LT :
-GE :
-LE :
-NOT :
-PLUSPLUS :
-MINUSMINUS :
-COMMA :
+PLUSEQ : >=
+MINUSEQ : <=
+DIVEQ : \/=
+STAREQ : \*=
+MODEQ : %=
+EQEQ : ==
+NOTEQ : !=
+GT : >
+LT : <
+GE : >=
+LE : <=
+NOT : !
+PLUSPLUS : \+\+
+MINUSMINUS --
+COMMA : ,
