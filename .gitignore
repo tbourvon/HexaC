@@ -32,7 +32,7 @@
 *.app
 
 # CMake
-
+build/
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
@@ -45,3 +45,6 @@ CTestTestfile.cmake
 
 # VSCode
 .vscode
+
+# ANTLR
+.antlr
