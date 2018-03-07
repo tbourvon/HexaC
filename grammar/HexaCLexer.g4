@@ -2,7 +2,6 @@ lexer grammar HexaCLexer;
 
 // Terminals
 
-ID : [_a-zA-Z][_a-zA-Z0-9]* ;
 IF : 'if' ;
 ELSE : 'else' ;
 WHILE : 'while' ;
@@ -16,10 +15,10 @@ INT_LIT : ('0'..'9')+ ;
 CHAR_LIT : '\'' .*? '\'' ;
 OPEN_PAR : '(' ;
 CLOSE_PAR : ')' ;
-OPEN_BRACE : '[' ;
-CLOSE_BRACE : ']' ;
-OPEN_BRACKET : '{' ;
-CLOSE_BRACKET : '}' ;
+OPEN_BRACE : '{' ;
+CLOSE_BRACE : '}' ;
+OPEN_BRACKET : '[' ;
+CLOSE_BRACKET : ']' ;
 SEMICOLON : ';' ;
 STAR : '*' ;
 PLUS : '+' ;
@@ -46,3 +45,6 @@ AND_AND : '&&' ;
 OR_OR : '||' ;
 HASH : '#' ;
 DOT : '.' ;
+ID : [_a-zA-Z][_a-zA-Z0-9]* ;
+
+WS: [ \n\t\r]+ -> channel(HIDDEN);

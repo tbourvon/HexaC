@@ -75,6 +75,7 @@ expr
 expr_lit
   : INT_LIT
   | CHAR_LIT
+  | ID
   ;
 
 call_expr_
