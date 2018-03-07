@@ -2,7 +2,7 @@ lexer grammar HexaCLexer;
 
 // Terminals
 
-ID : [_a-zA-Z][_a-zA-Z0-9]{0,30} ;
+ID : [_a-zA-Z][_a-zA-Z0-9]* ;
 IF : 'if' ;
 ELSE : 'else' ;
 WHILE : 'while' ;
