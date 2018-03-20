@@ -69,18 +69,42 @@ expr_stmt
   ;
 
 expr
-  : binary_op
+  : expr STAR expr
+  | expr DIV expr
+  | expr MOD expr
+  | expr PLUS expr
+  | expr MINUS expr
+  | expr EQ expr
+  | expr STAR_EQ expr
+  | expr DIV_EQ expr
+  | expr MOD_EQ expr
+  | expr PLUS_EQ expr
+  | expr MINUS_EQ expr
+  | expr AND_AND expr
+  | expr OR_OR expr
+  | expr EQ_EQ expr
+  | expr NOT_EQ expr
+  | expr GT expr
+  | expr LT expr
+  | expr GE expr
+  | expr LE expr
+
+  | OPEN_PAR expr CLOSE_PAR
+  | PLUS expr
+  | MINUS expr
+  | PLUS_PLUS expr
+  | MINUS_MINUS expr
+  | NOT expr
+  | expr PLUS_PLUS
+  | expr MINUS_MINUS
+
+  | call_expr
+
+  | literal
   ;
 
-expr_lit
-  : INT_LIT
-  | CHAR_LIT
-  | ID
-  ;
-
-call_expr_
+call_expr
   : ID OPEN_PAR arg_list CLOSE_PAR
-  | expr_lit
   ;
 
 arg_list
@@ -88,39 +112,10 @@ arg_list
   |
   ;
 
-unary_op
-  : OPEN_PAR unary_op CLOSE_PAR
-  | PLUS unary_op
-  | MINUS unary_op
-  | PLUS_PLUS unary_op
-  | MINUS_MINUS unary_op
-  | NOT unary_op
-  | unary_op PLUS_PLUS
-  | unary_op MINUS_MINUS
-  | call_expr_
-  ;
-
-binary_op
-  : unary_op STAR binary_op
-  | unary_op DIV binary_op
-  | unary_op MOD binary_op
-  | unary_op PLUS binary_op
-  | unary_op MINUS binary_op
-  | unary_op EQ binary_op
-  | unary_op STAR_EQ binary_op
-  | unary_op DIV_EQ binary_op
-  | unary_op MOD_EQ binary_op
-  | unary_op PLUS_EQ binary_op
-  | unary_op MINUS_EQ binary_op
-  | unary_op AND_AND binary_op
-  | unary_op OR_OR binary_op
-  | unary_op EQ_EQ binary_op
-  | unary_op NOT_EQ binary_op
-  | unary_op GT binary_op
-  | unary_op LT binary_op
-  | unary_op GE binary_op
-  | unary_op LE binary_op
-  | unary_op
+literal
+  : INT_LIT
+  | CHAR_LIT
+  | ID
   ;
 
 if_stmt
