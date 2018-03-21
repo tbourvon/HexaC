@@ -5,11 +5,16 @@
 
 class AST
 {
+public:
+    AST(Program* program) : m_program(program) {}
 protected:
     Program* m_program;
 };
 
 class Program {
+public:
+    Program(std::vector<Decl*> decls) : m_decls(decls) {}
+
 protected:
     std::vector<Decl*> m_decls;
 };
@@ -166,6 +171,7 @@ protected:
 class DeclRefExpr : public Expr {
 protected:
     Decl* m_decl;
+    std::string m_unresolvedName;
 };
 
 #endif // AST_H
