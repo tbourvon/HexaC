@@ -40,6 +40,14 @@ public:
             return (Stmt*)visit(ctx->var_decl());
         }
     }
+
+    virtual antlrcpp::Any visitIf_stmt(HexaCParser::If_stmtContext *ctx) override {
+        Expr* cond;
+        Expr* m_stmt;
+        Expr* m_elseStmt;
+
+        
+    };
 };
 
 #endif // ASTGENERATOR_H
