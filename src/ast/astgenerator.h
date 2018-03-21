@@ -2,6 +2,7 @@
 #define ASTGENERATOR_H
 
 #include <HexaCParserBaseVisitor.h>
+#include <HexaCLexer.h>
 #include "ast.h"
 
 
@@ -48,6 +49,40 @@ public:
 
         
     };
+    
+    virtual antlrcpp::Any visitDecl(HexaCParser::DeclContext *ctx) override {
+        if (HexaCParser::Func_declContext *func_ctx = ctx->func_decl()) {
+
+            BuiltinType::Kind kind = toKind(func_ctx->type()->type_id->getType());
+
+            std::vector<HexaCParser::ParamContext *> paramsRaw = func_ctx->param_list()->param();
+            std::vector<Param*> params;
+            for(HexaCParser::ParamContext* param : paramsRaw) {
+
+                BuiltinType::Kind kind = toKind(param->type()->type_id->getType());
+                params.push_back(new Param(param->getText(), new BuiltinType(kind)));
+
+            }
+
+            // TODO temp constructor BlockStmt
+            return new FuncDecl(func_ctx->ID()->getText(), new BuiltinType(kind), params, new BlockStmt());
+        }
+        if (HexaCParser::Var_declContext *var_ctx = ctx->var_decl()) {
+
+        }
+    }
+
+private:
+    BuiltinType::Kind toKind(int i) {
+        BuiltinType::Kind kind;
+        switch (i) {
+            case HexaCLexer::INT32_T: kind = BuiltinType::Kind::INT32_T; break;
+            case HexaCLexer::INT64_T: kind = BuiltinType::Kind::INT64_T; break;
+            case HexaCLexer::CHAR:    kind = BuiltinType::Kind::CHAR;    break;
+            case HexaCLexer::VOID:    kind = BuiltinType::Kind::VOID;    break;
+        }
+        return kind;
+    }
 };
 
 #endif // ASTGENERATOR_H

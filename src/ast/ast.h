@@ -5,7 +5,11 @@
 #include <string>
 
 class Decl {
-protected:
+public:
+    Decl(const std::string &m_name) : m_name(m_name) {}
+    Decl() {}
+
+    protected:
     std::string m_name;
 };
 class Program {
@@ -22,26 +26,32 @@ public:
 protected:
     Program* m_program;
 };
+
 class Type {
 
 };
 
 class BuiltinType : public Type {
-public:
-    enum class Kind {
-        INT32_T,
-        INT64_T,
-        CHAR,
-        VOID
-    };
+    public:
+        enum class Kind {
+            INT32_T,
+            INT64_T,
+            CHAR,
+            VOID
+        };
+        BuiltinType(Kind m_kind) : m_kind(m_kind) {}
 
-protected:
-    Kind m_kind;
+    protected:
+        Kind m_kind;
 };
 
 class Param {
 protected:
-    std::string m_name;
+    public:
+        Param(const std::string &m_name, Type *m_type) : m_name(m_name),
+                                                         m_type(m_type) {}
+    protected:
+        std::string m_name;
     Type* m_type;
 };
 class Stmt {
@@ -50,10 +60,20 @@ class Stmt {
 class BlockStmt : public Stmt {
 protected:
     std::vector<Stmt*> m_stmts;
+    public:
+        // TODO temp constructor
+        BlockStmt() {}
 };
+
 class FuncDecl : public Decl {
-protected:
-    Type* m_returnType;
+    public:
+        FuncDecl(const std::string &m_name, Type *m_returnType,
+                 const std::vector<Param *> &m_params, BlockStmt *m_body)
+                : Decl(m_name), m_returnType(m_returnType), m_params(m_params),
+                  m_body(m_body) {}
+
+    protected:
+        Type* m_returnType;
     std::vector<Param*> m_params;
     BlockStmt* m_body;
 };

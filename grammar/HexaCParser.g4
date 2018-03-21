@@ -29,10 +29,10 @@ func_decl
   ;
 
 type
-  : INT32_T
-  | INT64_T
-  | CHAR
-  | VOID
+  : type_id=INT32_T
+  | type_id=INT64_T
+  | type_id=CHAR
+  | type_id=VOID
   ;
 
 param_list
