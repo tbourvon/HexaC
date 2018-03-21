@@ -23,7 +23,23 @@ public:
       return new Program(decls);
     }
 
-
+    virtual antlrcpp::Any visitStmt(HexaCParser::StmtContext *ctx) override {
+        if(HexaCParser::BlockContext *block_ctx = ctx->block()){
+            return (Stmt*)visit(ctx->block());
+        }
+        else if(HexaCParser::If_stmtContext *if_ctx = ctx->if_stmt()){
+            return (Stmt*)visit(ctx->if_stmt());
+        }
+        else if(HexaCParser::While_stmtContext *while_ctx = ctx->while_stmt()){
+            return (Stmt*)visit(ctx->while_stmt());
+        }
+        else if(HexaCParser::Expr_stmtContext *expr_ctx = ctx->expr_stmt()){
+            return (Stmt*)visit(ctx->expr_stmt());
+        }
+        else if(HexaCParser::Var_declContext *var_ctx = ctx->var_decl()){
+            return (Stmt*)visit(ctx->var_decl());
+        }
+    }
 };
 
 #endif // ASTGENERATOR_H
