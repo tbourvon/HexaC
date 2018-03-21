@@ -50,6 +50,8 @@ CTestTestfile.cmake
 .antlr
 
 .idea
+/cmake-build-debug
 
 # QtCreator
 CMakeLists.txt.user
+
