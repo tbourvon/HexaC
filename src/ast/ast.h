@@ -2,6 +2,7 @@
 #define AST_H
 
 #include <vector>
+#include <string>
 
 class Decl {
 protected:
