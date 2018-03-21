@@ -23,6 +23,12 @@ antlr4cpp_process_grammar(demo HexaC
 include_directories(${antlr4cpp_include_dirs_HexaC})
 
 # add generated grammar to demo binary target
-add_executable(HexaC main.cpp ${antlr4cpp_src_files_HexaC})
+
+file(GLOB_RECURSE SOURCES
+    src/*.h
+    src/*.cpp
+)
+
+add_executable(HexaC ${SOURCES} ${antlr4cpp_src_files_HexaC})
 add_dependencies(HexaC antlr4cpp antlr4cpp_generation_HexaC)
 target_link_libraries(HexaC ${ANTLR4CPP_LIBS}/libantlr4-runtime.a)

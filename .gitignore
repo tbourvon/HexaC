@@ -48,3 +48,8 @@ CTestTestfile.cmake
 
 # ANTLR
 .antlr
+
+.idea
+
+# QtCreator
+CMakeLists.txt.user
