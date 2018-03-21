@@ -3,14 +3,10 @@
 
 #include <vector>
 
-class AST
-{
-public:
-    AST(Program* program) : m_program(program) {}
+class Decl {
 protected:
-    Program* m_program;
+    std::string m_name;
 };
-
 class Program {
 public:
     Program(std::vector<Decl*> decls) : m_decls(decls) {}
@@ -18,7 +14,13 @@ public:
 protected:
     std::vector<Decl*> m_decls;
 };
-
+class AST
+{
+public:
+    AST(Program* program) : m_program(program) {}
+protected:
+    Program* m_program;
+};
 class Type {
 
 };
@@ -36,11 +38,18 @@ protected:
     Kind m_kind;
 };
 
-class Decl {
+class Param {
 protected:
     std::string m_name;
+    Type* m_type;
 };
+class Stmt {
 
+};
+class BlockStmt : public Stmt {
+protected:
+    std::vector<Stmt*> m_stmts;
+};
 class FuncDecl : public Decl {
 protected:
     Type* m_returnType;
@@ -48,26 +57,19 @@ protected:
     BlockStmt* m_body;
 };
 
-class Param {
-protected:
-    std::string m_name;
-    Type* m_type;
-};
 
+class Expr {
+
+};
 class VarDecl: public Decl {
 protected:
     Type* m_type;
     Expr* m_initExpr;
 };
 
-class Stmt {
 
-};
 
-class BlockStmt : public Stmt {
-protected:
-    std::vector<Stmt*> m_stmts;
-};
+
 
 class DeclStmt : public Stmt {
 protected:
@@ -92,9 +94,7 @@ protected:
     Stmt* m_stmt;
 };
 
-class Expr {
 
-};
 
 class BinaryOp : public Expr {
 public:
