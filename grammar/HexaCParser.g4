@@ -69,7 +69,7 @@ expr_stmt
   ;
 
 expr
-  : expr STAR expr
+  : lhs=expr STAR rhs=expr
   | expr DIV expr
   | expr MOD expr
   | expr PLUS expr
@@ -89,7 +89,7 @@ expr
   | expr GE expr
   | expr LE expr
 
-  | OPEN_PAR expr CLOSE_PAR
+  | OPEN_PAR unary_expr=expr CLOSE_PAR
   | PLUS expr
   | MINUS expr
   | PLUS_PLUS expr

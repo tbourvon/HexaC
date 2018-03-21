@@ -3,16 +3,9 @@
 #include "HexaCLexer.h"
 #include "HexaCParser.h"
 #include "HexaCParserBaseListener.h"
+#include "ast/astgenerator.h"
 
 using namespace antlr4;
-
-class TreeShapeListener : public HexaC::HexaCParserBaseListener {
-public:
-  void enterProgram(HexaC::HexaCParser::ProgramContext * ctx) override {
-	// Do something when entering the key rule.
-  }
-};
-
 
 int main(int argc, const char* argv[]) {
   std::ifstream stream;
@@ -23,8 +16,10 @@ int main(int argc, const char* argv[]) {
   HexaC::HexaCParser parser(&tokens);
 
   tree::ParseTree *tree = parser.program();
-  TreeShapeListener listener;
-  tree::ParseTreeWalker::DEFAULT.walk(&listener, tree);
+
+  ASTGenerator astVisitor;
+  Program *program = astVisitor.visit(tree);
+  AST ast(program);
 
   return 0;
 }
