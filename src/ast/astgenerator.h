@@ -16,12 +16,11 @@ public:
       std::vector<Decl*> decls;
       for (HexaCParser::Toplevel_itemContext* top_level_ctx : ctx->toplevel_item()) {
           if (DeclContext *decl = top_level_ctx->decl()) {
-              visit(decl);
-              decls.push_back(decl);
+              decls.push_back((Decl*)visit(decl));
           }
       }
 
-      return new Program(decl);
+      return new Program(decls);
     }
 };
 
