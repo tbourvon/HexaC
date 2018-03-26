@@ -6,11 +6,14 @@
 
 class Decl {
 public:
+Decl(const std::string &m_name) : m_name(m_name) {}
+    Decl() {}
   virtual ~Decl() = default;
   const std::string getExpr() const { return m_name; }
+    
 
-protected:
-  std::string m_name;
+    protected:
+    std::string m_name;
 };
 class Program {
 public:
@@ -24,6 +27,12 @@ class AST {
 public:
   AST(Program *program) : m_program(program) {}
   const Program *getProgram() const { return m_program; }
+  
+protected:
+    Program* m_program;
+};
+
+class Type {
 
 protected:
   Program *m_program;
@@ -34,19 +43,22 @@ class BuiltinType : public Type {
 public:
   enum class Kind { INT32_T, INT64_T, CHAR, VOID };
   const Kind getKind() const { return m_kind; }
+        
+        BuiltinType(Kind m_kind) : m_kind(m_kind) {}
 
-protected:
-  Kind m_kind;
+    protected:
+        Kind m_kind;
 };
 
 class Param {
 public:
   const std::string getName() const { return m_name; }
   const Type *getType() const { return m_type; }
-
-protected:
-  std::string m_name;
-  Type *m_type;
+        Param(const std::string &m_name, Type *m_type) : m_name(m_name),
+                                                         m_type(m_type) {}
+    protected:
+        std::string m_name;
+    Type* m_type;
 };
 class Stmt {
   public:
@@ -59,8 +71,13 @@ public:
 protected:
   std::vector<Stmt *> m_body;
 };
+
 class FuncDecl : public Decl {
 public:
+FuncDecl(const std::string &m_name, Type *m_returnType,
+                 const std::vector<Param *> &m_params, BlockStmt *m_body)
+                : Decl(m_name), m_returnType(m_returnType), m_params(m_params),
+                  m_body(m_body) {}
   const Type *getType() const { return m_returnType; }
   const std::vector<Param *> getParams() const { return m_params; }
   const BlockStmt *getBlock() const { return m_body; }
@@ -74,10 +91,13 @@ protected:
 class Expr {};
 class VarDecl : public Decl {
 public:
+VarDecl(const std::string &m_name, Type *m_type, Expr *m_initExpr)
+                : Decl(m_name), m_type(m_type), m_initExpr(m_initExpr) {}
   const Type *getType() const { return m_type; }
   const Expr *getExpr() const { return m_initExpr; }
 
 protected:
+
   Type *m_type;
   Expr *m_initExpr;
 };
