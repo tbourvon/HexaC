@@ -60,9 +60,6 @@ class Stmt {
 class BlockStmt : public Stmt {
 protected:
     std::vector<Stmt*> m_stmts;
-    public:
-        // TODO temp constructor
-        BlockStmt() {}
 };
 
 class FuncDecl : public Decl {
@@ -83,7 +80,10 @@ class Expr {
 
 };
 class VarDecl: public Decl {
-protected:
+public:
+    VarDecl(const std::string &m_name, Type *m_type, Expr *m_initExpr)
+                : Decl(m_name), m_type(m_type), m_initExpr(m_initExpr) {}
+    protected:
     Type* m_type;
     Expr* m_initExpr;
 };

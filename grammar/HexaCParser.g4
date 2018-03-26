@@ -61,7 +61,7 @@ stmt
   ;
 
 var_decl
-  : type ID SEMICOLON
+  : type ID (EQ expr)? SEMICOLON
   ;
 
 expr_stmt
