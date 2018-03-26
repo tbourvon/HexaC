@@ -87,6 +87,7 @@ public:
         }
     }
 
+
     virtual antlrcpp::Any visitLiteral(HexaCParser::LiteralContext *ctx) override {
         if (ctx->INT_LIT()) {
             return (Expr*)(new IntegerLiteral(stoi(ctx->INT_LIT()->getText())));
@@ -156,29 +157,37 @@ public:
         return new ExprStmt(expr);
     };
 
+    virtual antlrcpp::Any visitType(HexaCParser::TypeContext *ctx) override {
+        BuiltinType::Kind kind;
+        switch (ctx->type_id->getType()) {
+            case HexaCLexer::INT32_T: kind = BuiltinType::Kind::INT32_T; break;
+            case HexaCLexer::INT64_T: kind = BuiltinType::Kind::INT64_T; break;
+            case HexaCLexer::CHAR:    kind = BuiltinType::Kind::CHAR;    break;
+            case HexaCLexer::VOID:    kind = BuiltinType::Kind::VOID;    break;
+        }
+        return new BuiltinType(kind);
+    }
+
     virtual antlrcpp::Any visitParam_list(HexaCParser::Param_listContext *ctx) override {
         std::vector<HexaCParser::ParamContext *> paramsRaw = ctx->param();
         std::vector<Param*> params;
         for(HexaCParser::ParamContext* param : paramsRaw) {
-            BuiltinType::Kind kind = toKind(param->type()->type_id->getType());
-            params.push_back(new Param(param->getText(), new BuiltinType(kind)));
+            params.push_back(new Param(param->getText(), (BuiltinType*) visitType(param->type())));
         }
         return params;
     }
 
     virtual antlrcpp::Any visitParam(HexaCParser::ParamContext *ctx) override {
-        BuiltinType::Kind kind = toKind(ctx->type()->type_id->getType());
+        BuiltinType::Kind kind = visitType(ctx->type());
         return new Param(ctx->getText(), new BuiltinType(kind));
     }
 
     virtual antlrcpp::Any visitFunc_decl(HexaCParser::Func_declContext *ctx) override {
-        BuiltinType::Kind kind = toKind(ctx->type()->type_id->getType());
-        return (Decl*)(new FuncDecl(ctx->ID()->getText(), new BuiltinType(kind), visitParam_list(ctx->param_list()), visitBlock(ctx->block())));
+        return (Decl*)(new FuncDecl(ctx->ID()->getText(), (BuiltinType*) visitType(ctx->type()), visitParam_list(ctx->param_list()), visitBlock(ctx->block())));
     }
 
     virtual antlrcpp::Any visitVar_decl(HexaCParser::Var_declContext *ctx) override {
-        BuiltinType::Kind kind = toKind(ctx->type()->type_id->getType());
-        return (Decl*)(new VarDecl(ctx->ID()->getText(), new BuiltinType(kind), visitExpr(ctx->expr())));
+        return (Decl*)(new VarDecl(ctx->ID()->getText(), (BuiltinType*) visitType(ctx->type()), visitExpr(ctx->expr())));
     }
 
     virtual antlrcpp::Any visitDecl(HexaCParser::DeclContext *ctx) override {
@@ -195,17 +204,6 @@ protected:
     Decl* getDeclByName(const std::string& name) {
         auto table = m_scopeDeclarationTable.at(m_currentScope);
         return table.at(name);
-    }
-
-    BuiltinType::Kind toKind(int i) {
-        BuiltinType::Kind kind;
-        switch (i) {
-            case HexaCLexer::INT32_T: kind = BuiltinType::Kind::INT32_T; break;
-            case HexaCLexer::INT64_T: kind = BuiltinType::Kind::INT64_T; break;
-            case HexaCLexer::CHAR:    kind = BuiltinType::Kind::CHAR;    break;
-            case HexaCLexer::VOID:    kind = BuiltinType::Kind::VOID;    break;
-        }
-        return kind;
     }
 
     int m_topScopeNumber;
