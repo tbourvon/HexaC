@@ -55,3 +55,4 @@ CTestTestfile.cmake
 # QtCreator
 CMakeLists.txt.user
 
+.DS_Store
