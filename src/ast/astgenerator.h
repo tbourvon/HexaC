@@ -106,7 +106,7 @@ public:
             return (Stmt*)visit(ctx->expr_stmt());
         }
         else if(HexaCParser::Var_declContext *var_ctx = ctx->var_decl()){
-            return (Stmt*)visit(ctx->var_decl());
+            return (Stmt*)(new DeclStmt((Decl*)visit(ctx->var_decl())));
         } else {
             return (Stmt*)nullptr;
         }
@@ -114,28 +114,39 @@ public:
     }
 
     virtual antlrcpp::Any visitIf_stmt(HexaCParser::If_stmtContext *ctx) override {
-        if(HexaCParser::ExprContext *cond_ctx = ctx->expr()){
-            return (IfStmt*)visit(ctx->expr());
-        }
-        else if(HexaCParser::StmtContext *ifStmt = ctx->stmt().at(0)){
-            return (IfStmt*)visit(ctx->stmt().at(0));
-        }
-        else if(HexaCParser::StmtContext *elseStmt = ctx->stmt().at(1)){
-            return (IfStmt*)visit(ctx->stmt().at(1));
-        } else {
-            return (IfStmt*)nullptr;
-        }
+        Expr* cond = visit(ctx->expr());
+        Stmt* ifStmt = visit(ctx->stmt().at(0));
+        Stmt* elseStmt = visit(ctx->stmt().at(1));
+
+        return new IfStmt(cond, ifStmt, elseStmt);
     };
 
     virtual antlrcpp::Any visitWhile_stmt(HexaCParser::While_stmtContext *ctx) override {
-        if(HexaCParser::ExprContext *cond_ctx = ctx->expr()){
-            return (WhileStmt*)visit(ctx->expr());
-        }
-        else if(HexaCParser::StmtContext *ifStmt = ctx->stmt()){
-            return (WhileStmt*)visit(ctx->stmt());
+        Expr* cond = visit(ctx->expr());
+        Stmt* stmt = visit(ctx->stmt());
+
+        return new WhileStmt(cond, stmt);
+    };
+
+    virtual antlrcpp::Any visitBlock(HexaCParser::BlockContext *ctx) override {
+        std::vector<Stmt*> stmtList = visit(ctx->stmt_list());
+
+        return new BlockStmt(stmtList);
+    };
+
+    virtual antlrcpp::Any visitStmt_list(HexaCParser::Stmt_listContext *ctx) override {
+        std::vector<Stmt*> stmts;
+        for (auto stmtCtx : ctx->stmt()) {
+            stmts.push_back(visit(stmtCtx));
         }
 
-        return nullptr;
+        return stmts;
+    };
+
+    virtual antlrcpp::Any visitExpr_stmt(HexaCParser::Expr_stmtContext *ctx) override {
+        Expr* expr = visit(ctx->expr());
+
+        return new ExprStmt(expr);
     };
 
     virtual antlrcpp::Any visitDecl(HexaCParser::DeclContext *ctx) override {

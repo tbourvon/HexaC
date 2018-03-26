@@ -61,6 +61,7 @@ class Stmt {
 };
 class BlockStmt : public Stmt {
 public:
+    BlockStmt(std::vector<Stmt *> body) : m_body(body) {}
   const std::vector<Stmt *> getBody() const { return m_body; }
 
 protected:
@@ -99,14 +100,16 @@ protected:
 
 class DeclStmt : public Stmt {
 public:
-  const Decl *getDecl() const { return m_decl; }
+    DeclStmt(Decl* decl) : m_decl(decl) {}
+    const Decl *getDecl() const { return m_decl; }
 
 protected:
-  Decl *m_decl;
+    Decl *m_decl;
 };
 
 class ExprStmt : public Stmt {
 public:
+    ExprStmt(Expr* expr) : m_expr(expr) {}
   const Expr *getExpr() const { return m_expr; }
 
 protected:
@@ -115,18 +118,22 @@ protected:
 
 class IfStmt : public Stmt {
 public:
-  const Expr *getCond() const { return m_cond; }
-  const Stmt *getStmt() const { return m_stmt; }
-  const Stmt *getElseStmt() const { return m_elseStmt; }
+    IfStmt(Expr* cond, Stmt* stmt, Stmt* elseStmt) : m_cond(cond), m_stmt(stmt), m_elseStmt(elseStmt) {}
+
+    const Expr *getCond() const { return m_cond; }
+    const Stmt *getStmt() const { return m_stmt; }
+    const Stmt *getElseStmt() const { return m_elseStmt; }
 
 protected:
-  Expr *m_cond;
-  Stmt *m_stmt;
-  Stmt *m_elseStmt;
+    Expr *m_cond;
+    Stmt *m_stmt;
+    Stmt *m_elseStmt;
 };
 
 class WhileStmt : public Stmt {
 public:
+    WhileStmt(Expr* cond, Stmt* stmt) : m_cond(cond), m_stmt(stmt) {}
+
   const Expr *getCond() const { return m_cond; }
   const Stmt *getStmt() const { return m_stmt; }
 
