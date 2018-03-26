@@ -6,7 +6,6 @@
 #include <HexaCLexer.h>
 #include "CFG.h"
 #include "IRInstr.h"
-#include "../ast/ast.h"
 
 
 class BasicBlock {
