@@ -1,156 +1,196 @@
 #ifndef AST_H
 #define AST_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 class Decl {
-protected:
+public:
+Decl(const std::string &m_name) : m_name(m_name) {}
+    Decl() {}
+  virtual ~Decl() = default;
+  const std::string getExpr() const { return m_name; }
+    
+
+    protected:
     std::string m_name;
 };
 class Program {
 public:
-    Program(std::vector<Decl*> decls) : m_decls(decls) {}
+  Program(std::vector<Decl *> decls) : m_decls(decls) {}
+  const std::vector<Decl *> getDecls() const { return m_decls; }
 
 protected:
-    std::vector<Decl*> m_decls;
+  std::vector<Decl *> m_decls;
 };
-class AST
-{
+class AST {
 public:
-    AST(Program* program) : m_program(program) {}
+  AST(Program *program) : m_program(program) {}
+  const Program *getProgram() const { return m_program; }
+  
 protected:
     Program* m_program;
 };
-class Type {
 
-};
+class Type {};
 
 class BuiltinType : public Type {
 public:
-    enum class Kind {
-        INT32_T,
-        INT64_T,
-        CHAR,
-        VOID
-    };
+  enum class Kind { INT32_T, INT64_T, CHAR, VOID };
+  const Kind getKind() const { return m_kind; }
+        
+        BuiltinType(Kind m_kind) : m_kind(m_kind) {}
 
-protected:
-    Kind m_kind;
+    protected:
+        Kind m_kind;
 };
 
 class Param {
-protected:
-    std::string m_name;
+public:
+  const std::string getName() const { return m_name; }
+  const Type *getType() const { return m_type; }
+        Param(const std::string &m_name, Type *m_type) : m_name(m_name),
+                                                         m_type(m_type) {}
+    protected:
+        std::string m_name;
     Type* m_type;
 };
 class Stmt {
-
+  public:
+  virtual ~Stmt() = default;
 };
 class BlockStmt : public Stmt {
+public:
+  const std::vector<Stmt *> getBody() const { return m_body; }
+
 protected:
-    std::vector<Stmt*> m_stmts;
+  std::vector<Stmt *> m_body;
 };
+
 class FuncDecl : public Decl {
+public:
+FuncDecl(const std::string &m_name, Type *m_returnType,
+                 const std::vector<Param *> &m_params, BlockStmt *m_body)
+                : Decl(m_name), m_returnType(m_returnType), m_params(m_params),
+                  m_body(m_body) {}
+  const Type *getType() const { return m_returnType; }
+  const std::vector<Param *> getParams() const { return m_params; }
+  const BlockStmt *getBlock() const { return m_body; }
+
 protected:
-    Type* m_returnType;
-    std::vector<Param*> m_params;
-    BlockStmt* m_body;
+  Type *m_returnType;
+  std::vector<Param *> m_params;
+  BlockStmt *m_body;
 };
 
+class Expr {};
+class VarDecl : public Decl {
+public:
+VarDecl(const std::string &m_name, Type *m_type, Expr *m_initExpr)
+                : Decl(m_name), m_type(m_type), m_initExpr(m_initExpr) {}
+  const Type *getType() const { return m_type; }
+  const Expr *getExpr() const { return m_initExpr; }
 
-class Expr {
-
-};
-class VarDecl: public Decl {
 protected:
-    Type* m_type;
-    Expr* m_initExpr;
+
+  Type *m_type;
+  Expr *m_initExpr;
 };
-
-
-
-
 
 class DeclStmt : public Stmt {
+public:
+  const Decl *getDecl() const { return m_decl; }
+
 protected:
-    Decl* m_decl;
+  Decl *m_decl;
 };
 
 class ExprStmt : public Stmt {
+public:
+  const Expr *getExpr() const { return m_expr; }
+
 protected:
-    Expr* m_expr;
+  Expr *m_expr;
 };
 
 class IfStmt : public Stmt {
+public:
+  const Expr *getCond() const { return m_cond; }
+  const Stmt *getStmt() const { return m_stmt; }
+  const Stmt *getElseStmt() const { return m_elseStmt; }
+
 protected:
-    Expr* m_cond;
-    Stmt* m_stmt;
-    Stmt* m_elseStmt;
+  Expr *m_cond;
+  Stmt *m_stmt;
+  Stmt *m_elseStmt;
 };
 
 class WhileStmt : public Stmt {
+public:
+  const Expr *getCond() const { return m_cond; }
+  const Stmt *getStmt() const { return m_stmt; }
+
 protected:
-    Expr* m_cond;
-    Stmt* m_stmt;
+  Expr *m_cond;
+  Stmt *m_stmt;
 };
-
-
 
 class BinaryOp : public Expr {
 public:
-    enum class Kind {
-        MULT,
-        DIV,
-        MOD,
-        ADD,
-        SUB,
-        ASSIGN,
-        ASSIGN_MULT,
-        ASSIGN_DIV,
-        ASSIGN_MOD,
-        ASSIGN_ADD,
-        ASSIGN_SUB,
-        EQ,
-        NEQ,
-        OR,
-        AND,
-        GT,
-        LT,
-        GE,
-        LE
-    };
+  enum class Kind {
+    MULT,
+    DIV,
+    MOD,
+    ADD,
+    SUB,
+    ASSIGN,
+    ASSIGN_MULT,
+    ASSIGN_DIV,
+    ASSIGN_MOD,
+    ASSIGN_ADD,
+    ASSIGN_SUB,
+    EQ,
+    NEQ,
+    OR,
+    AND,
+    GT,
+    LT,
+    GE,
+    LE
+  };
 
-    BinaryOp(Kind kind, Expr* lhs, Expr* rhs) : m_kind(kind), m_lhs(lhs), m_rhs(rhs) {}
+  const Kind getKind() const { return m_kind; }
+  const Expr *getLeftHandSide() const { return m_lhs; }
+  const Expr *getRightHandSide() const { return m_rhs; }
+
+  BinaryOp(Kind kind, Expr* lhs, Expr* rhs) : m_kind(kind), m_lhs(lhs), m_rhs(rhs) {}
 
 protected:
-    Kind m_kind;
-    Expr* m_lhs;
-    Expr* m_rhs;
+  Kind m_kind;
+  Expr *m_lhs;
+  Expr *m_rhs;
 };
 
 class UnaryOp : public Expr {
 public:
-    enum class Kind {
-        PLUS,
-        MINUS,
-        NOT,
-        PRE_INC,
-        PRE_DEC,
-        POST_INC,
-        POST_DEC
-    };
+  enum class Kind { PLUS, MINUS, NOT, PRE_INC, PRE_DEC, POST_INC, POST_DEC };
+
+  const Kind getKind() const { return m_kind; }
+  const Expr *getExpr() const { return m_expr; }
 
     UnaryOp(Kind kind, Expr* expr) : m_kind(kind), m_expr(expr) {}
 
 protected:
-    Kind m_kind;
-    Expr* m_expr;
+  Kind m_kind;
+  Expr *m_expr;
 };
 
 class CallExpr : public Expr {
 public:
     CallExpr(Expr* callee, std::vector<Expr*> args) : m_callee(callee), m_args(args) {}
+
+    const std::vector<Expr *> getArgs() const { return m_args; }
+    const Expr *getCallee() const { return m_callee; }
 protected:
     Expr* m_callee;
     std::vector<Expr*> m_args;
@@ -159,33 +199,39 @@ protected:
 class GroupExpr : public Expr {
 public:
     GroupExpr(Expr* subExpr) : m_subExpr(subExpr) {}
+    const Expr *getSubExpr() const { return m_subExpr; }
+
 protected:
-    Expr* m_subExpr;
+  Expr *m_subExpr;
 };
 
-class LiteralExpr : public Expr {
-
-};
+class LiteralExpr : public Expr {};
 
 class IntegerLiteral : public LiteralExpr {
 public:
     IntegerLiteral(int64_t value) : m_value(value) {}
+    const int64_t getValue() const { return m_value; }
+
 protected:
-    int64_t m_value;
+  int64_t m_value;
 };
 
 class CharLiteral : public LiteralExpr {
 public:
     CharLiteral(char value) : m_value(value) {}
+    const char getValue() const { return m_value; }
+
 protected:
-    char m_value;
+  char m_value;
 };
 
 class DeclRefExpr : public Expr {
 public:
     DeclRefExpr(Decl* decl) : m_decl(decl) {}
+    const Decl *getDecl() const { return m_decl; }
+
 protected:
-    Decl* m_decl;
+    Decl *m_decl;
 };
 
 #endif // AST_H

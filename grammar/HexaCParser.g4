@@ -29,10 +29,10 @@ func_decl
   ;
 
 type
-  : INT32_T
-  | INT64_T
-  | CHAR
-  | VOID
+  : type_id=INT32_T
+  | type_id=INT64_T
+  | type_id=CHAR
+  | type_id=VOID
   ;
 
 param_list
@@ -61,7 +61,7 @@ stmt
   ;
 
 var_decl
-  : type ID SEMICOLON
+  : type ID (EQ expr)? SEMICOLON
   ;
 
 expr_stmt
@@ -116,7 +116,7 @@ literal
   ;
 
 if_stmt
-  : IF OPEN_PAR expr CLOSE_PAR stmt (ELSE stmt)?
+  : IF OPEN_PAR expr CLOSE_PAR stmtofif=stmt (ELSE stmtofelse=stmt)?
   ;
 
 while_stmt
