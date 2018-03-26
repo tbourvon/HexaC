@@ -16,12 +16,19 @@ public:
     virtual antlrcpp::Any visitProgram(HexaCParser::ProgramContext *ctx) override {
       std::vector<Decl*> decls;
       for (HexaCParser::Toplevel_itemContext* top_level_ctx : ctx->toplevel_item()) {
-          if (HexaCParser::DeclContext *decl_ctx = top_level_ctx->decl()) {
-              decls.push_back((Decl*)visit(decl_ctx));
-          }
+          Decl* decl = (Decl*) visitToplevel_item(top_level_ctx);
+          decls.push_back(decl);
       }
 
       return new Program(decls);
+    }
+
+    virtual antlrcpp::Any visitToplevel_item(HexaCParser::Toplevel_itemContext *ctx) override {
+        if (HexaCParser::DeclContext *decl_ctx = ctx->decl()) {
+            return (Decl*)visit(decl_ctx);
+        } else {
+            return (Expr*)nullptr;
+        }
     }
 
     virtual antlrcpp::Any visitExpr(HexaCParser::ExprContext *ctx) override {
