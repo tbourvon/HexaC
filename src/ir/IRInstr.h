@@ -7,10 +7,8 @@
 #include <iostream>
 #include <initializer_list>
 #include <HexaCLexer.h>
+#include "BasicBlock.h"
 
-class BasicBlock;
-class CFG;
-class DefFonction;
 
 //! The class for one 3-address instruction
 class IRInstr {
