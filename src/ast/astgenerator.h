@@ -75,12 +75,12 @@ public:
                 BuiltinType::Kind kind = toKind(param->type()->type_id->getType());
                 params.push_back(new Param(param->getText(), new BuiltinType(kind)));
             }
-
-            // TODO temp constructor BlockStmt
-            return new FuncDecl(func_ctx->ID()->getText(), new BuiltinType(kind), params, new BlockStmt());
-        }
-        if (HexaCParser::Var_declContext *var_ctx = ctx->var_decl()) {
-
+            return new FuncDecl(func_ctx->ID()->getText(), new BuiltinType(kind), params, visitBlock(func_ctx->block()));
+        } else if (HexaCParser::Var_declContext *var_ctx = ctx->var_decl()) {
+            BuiltinType::Kind kind = toKind(var_ctx->type()->type_id->getType());
+            return new VarDecl(var_ctx->ID()->getText(), new BuiltinType(kind), visitExpr(var_ctx->expr()));
+        } else {
+            return (Decl*) nullptr;
         }
     }
 
