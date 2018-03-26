@@ -68,43 +68,40 @@ expr_stmt
   : expr SEMICOLON
   ;
 
-expr
-  : lhs=expr STAR rhs=expr
-  | expr DIV expr
-  | expr MOD expr
-  | expr PLUS expr
-  | expr MINUS expr
-  | expr EQ expr
-  | expr STAR_EQ expr
-  | expr DIV_EQ expr
-  | expr MOD_EQ expr
-  | expr PLUS_EQ expr
-  | expr MINUS_EQ expr
-  | expr AND_AND expr
-  | expr OR_OR expr
-  | expr EQ_EQ expr
-  | expr NOT_EQ expr
-  | expr GT expr
-  | expr LT expr
-  | expr GE expr
-  | expr LE expr
+expr returns[bool postfix]
+  : bin_lhs=expr bin_op=STAR bin_rhs=expr
+  | bin_lhs=expr bin_op=DIV bin_rhs=expr
+  | bin_lhs=expr bin_op=MOD bin_rhs=expr
+  | bin_lhs=expr bin_op=PLUS bin_rhs=expr
+  | bin_lhs=expr bin_op=MINUS bin_rhs=expr
+  | bin_lhs=expr bin_op=EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=STAR_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=DIV_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=MOD_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=PLUS_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=MINUS_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=AND_AND bin_rhs=expr
+  | bin_lhs=expr bin_op=OR_OR bin_rhs=expr
+  | bin_lhs=expr bin_op=EQ_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=NOT_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=GT bin_rhs=expr
+  | bin_lhs=expr bin_op=LT bin_rhs=expr
+  | bin_lhs=expr bin_op=GE bin_rhs=expr
+  | bin_lhs=expr bin_op=LE bin_rhs=expr
 
-  | OPEN_PAR unary_expr=expr CLOSE_PAR
-  | PLUS expr
-  | MINUS expr
-  | PLUS_PLUS expr
-  | MINUS_MINUS expr
-  | NOT expr
-  | expr PLUS_PLUS
-  | expr MINUS_MINUS
+  | OPEN_PAR group_expr=expr CLOSE_PAR
 
-  | call_expr
+  | un_op=PLUS un_expr=expr { $postfix = false; }
+  | un_op=MINUS un_expr=expr { $postfix = false; }
+  | un_op=PLUS_PLUS un_expr=expr { $postfix = false; }
+  | un_op=MINUS_MINUS un_expr=expr { $postfix = false; }
+  | un_op=NOT un_expr=expr { $postfix = false; }
+  | un_expr=expr un_op=PLUS_PLUS { $postfix = true; }
+  | un_expr=expr un_op=MINUS_MINUS { $postfix = true; }
+
+  | callee=expr OPEN_PAR arg_list CLOSE_PAR
 
   | literal
-  ;
-
-call_expr
-  : ID OPEN_PAR arg_list CLOSE_PAR
   ;
 
 arg_list

@@ -121,6 +121,8 @@ public:
         LE
     };
 
+    BinaryOp(Kind kind, Expr* lhs, Expr* rhs) : m_kind(kind), m_lhs(lhs), m_rhs(rhs) {}
+
 protected:
     Kind m_kind;
     Expr* m_lhs;
@@ -139,18 +141,24 @@ public:
         POST_DEC
     };
 
+    UnaryOp(Kind kind, Expr* expr) : m_kind(kind), m_expr(expr) {}
+
 protected:
     Kind m_kind;
     Expr* m_expr;
 };
 
 class CallExpr : public Expr {
+public:
+    CallExpr(Expr* callee, std::vector<Expr*> args) : m_callee(callee), m_args(args) {}
 protected:
+    Expr* m_callee;
     std::vector<Expr*> m_args;
-    Expr* m_callerExpr;
 };
 
 class GroupExpr : public Expr {
+public:
+    GroupExpr(Expr* subExpr) : m_subExpr(subExpr) {}
 protected:
     Expr* m_subExpr;
 };
@@ -160,19 +168,24 @@ class LiteralExpr : public Expr {
 };
 
 class IntegerLiteral : public LiteralExpr {
+public:
+    IntegerLiteral(int64_t value) : m_value(value) {}
 protected:
     int64_t m_value;
 };
 
 class CharLiteral : public LiteralExpr {
+public:
+    CharLiteral(char value) : m_value(value) {}
 protected:
     char m_value;
 };
 
 class DeclRefExpr : public Expr {
+public:
+    DeclRefExpr(Decl* decl) : m_decl(decl) {}
 protected:
     Decl* m_decl;
-    std::string m_unresolvedName;
 };
 
 #endif // AST_H
