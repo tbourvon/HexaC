@@ -119,7 +119,7 @@ literal
   ;
 
 if_stmt
-  : IF OPEN_PAR expr CLOSE_PAR stmt (ELSE stmt)?
+  : IF OPEN_PAR expr CLOSE_PAR stmtofif=stmt (ELSE stmtofelse=stmt)?
   ;
 
 while_stmt

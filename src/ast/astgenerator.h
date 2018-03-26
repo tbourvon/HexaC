@@ -43,13 +43,18 @@ public:
     }
 
     virtual antlrcpp::Any visitIf_stmt(HexaCParser::If_stmtContext *ctx) override {
-        Expr* cond;
-        Expr* m_stmt;
-        Expr* m_elseStmt;
+        if(HexaCParser::ExprContext *cond_ctx = ctx->expr()){
+            return (IfStmt*)visit(ctx->expr());
+        }
+        else if(HexaCParser::StmtContext *ifStmt = ctx->stmt().at(0)){
+            return (Stmt*)visit(ctx->stmt().at(0));
+        }
+        else if(HexaCParser::StmtContext *elseStmt = ctx->stmt().at(1)){
+            return (Stmt*)visit(ctx->stmt().at(1));
+        }
 
-        
     };
-    
+
     virtual antlrcpp::Any visitDecl(HexaCParser::DeclContext *ctx) override {
         if (HexaCParser::Func_declContext *func_ctx = ctx->func_decl()) {
 
