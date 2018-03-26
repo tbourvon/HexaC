@@ -37,7 +37,6 @@ class Type {
 protected:
   Program *m_program;
 };
-class Type {};
 
 class BuiltinType : public Type {
 public:
