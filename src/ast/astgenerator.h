@@ -144,7 +144,7 @@ public:
     virtual antlrcpp::Any visitStmt_list(HexaCParser::Stmt_listContext *ctx) override {
         std::vector<Stmt*> stmts;
         for (auto stmtCtx : ctx->stmt()) {
-            stmts.push_back(visit(stmtCtx));
+            stmts.push_back((Stmt*)visit(stmtCtx));
         }
 
         return stmts;
