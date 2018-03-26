@@ -37,7 +37,7 @@ class Type {};
 class BuiltinType : public Type {
 public:
   enum class Kind { INT32_T, INT64_T, CHAR, VOID };
-  const Kind getKind() const { return m_kind; }
+    Kind getKind() const { return m_kind; }
         
         BuiltinType(Kind m_kind) : m_kind(m_kind) {}
 
@@ -166,7 +166,7 @@ public:
     LE
   };
 
-  const Kind getKind() const { return m_kind; }
+   Kind getKind() const { return m_kind; }
   const Expr *getLeftHandSide() const { return m_lhs; }
   const Expr *getRightHandSide() const { return m_rhs; }
 
@@ -182,7 +182,7 @@ class UnaryOp : public Expr {
 public:
   enum class Kind { PLUS, MINUS, NOT, PRE_INC, PRE_DEC, POST_INC, POST_DEC };
 
-  const Kind getKind() const { return m_kind; }
+   Kind getKind() const { return m_kind; }
   const Expr *getExpr() const { return m_expr; }
 
     UnaryOp(Kind kind, Expr* expr) : m_kind(kind), m_expr(expr) {}
@@ -217,7 +217,7 @@ class LiteralExpr : public Expr {};
 class IntegerLiteral : public LiteralExpr {
 public:
     IntegerLiteral(int64_t value) : m_value(value) {}
-    const int64_t getValue() const { return m_value; }
+     int64_t getValue() const { return m_value; }
 
 protected:
   int64_t m_value;
@@ -226,7 +226,7 @@ protected:
 class CharLiteral : public LiteralExpr {
 public:
     CharLiteral(char value) : m_value(value) {}
-    const char getValue() const { return m_value; }
+     char getValue() const { return m_value; }
 
 protected:
   char m_value;
