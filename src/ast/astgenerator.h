@@ -149,22 +149,36 @@ public:
         return new ExprStmt(expr);
     };
 
+    virtual antlrcpp::Any visitParam_list(HexaCParser::Param_listContext *ctx) override {
+        std::vector<HexaCParser::ParamContext *> paramsRaw = ctx->param();
+        std::vector<Param*> params;
+        for(HexaCParser::ParamContext* param : paramsRaw) {
+            BuiltinType::Kind kind = toKind(param->type()->type_id->getType());
+            params.push_back(new Param(param->getText(), new BuiltinType(kind)));
+        }
+        return params;
+    }
+
+    virtual antlrcpp::Any visitParam(HexaCParser::ParamContext *ctx) override {
+        BuiltinType::Kind kind = toKind(ctx->type()->type_id->getType());
+        return new Param(ctx->getText(), new BuiltinType(kind));
+    }
+
+    virtual antlrcpp::Any visitFunc_decl(HexaCParser::Func_declContext *ctx) override {
+        BuiltinType::Kind kind = toKind(ctx->type()->type_id->getType());
+        return (Decl*)(new FuncDecl(ctx->ID()->getText(), new BuiltinType(kind), visitParam_list(ctx->param_list()), visitBlock(ctx->block())));
+    }
+
+    virtual antlrcpp::Any visitVar_decl(HexaCParser::Var_declContext *ctx) override {
+        BuiltinType::Kind kind = toKind(ctx->type()->type_id->getType());
+        return (Decl*)(new VarDecl(ctx->ID()->getText(), new BuiltinType(kind), visitExpr(ctx->expr())));
+    }
+
     virtual antlrcpp::Any visitDecl(HexaCParser::DeclContext *ctx) override {
         if (HexaCParser::Func_declContext *func_ctx = ctx->func_decl()) {
-
-            BuiltinType::Kind kind = toKind(func_ctx->type()->type_id->getType());
-
-            std::vector<HexaCParser::ParamContext *> paramsRaw = func_ctx->param_list()->param();
-            std::vector<Param*> params;
-            for(HexaCParser::ParamContext* param : paramsRaw) {
-
-                BuiltinType::Kind kind = toKind(param->type()->type_id->getType());
-                params.push_back(new Param(param->getText(), new BuiltinType(kind)));
-            }
-            return (Decl*)(new FuncDecl(func_ctx->ID()->getText(), new BuiltinType(kind), params, visitBlock(func_ctx->block())));
+            visitFunc_decl(ctx->func_decl());
         } else if (HexaCParser::Var_declContext *var_ctx = ctx->var_decl()) {
-            BuiltinType::Kind kind = toKind(var_ctx->type()->type_id->getType());
-            return (Decl*)(new VarDecl(var_ctx->ID()->getText(), new BuiltinType(kind), visitExpr(var_ctx->expr())));
+            visitVar_decl(ctx->var_decl());
         } else {
             return (Decl*) nullptr;
         }
