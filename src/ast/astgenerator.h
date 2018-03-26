@@ -47,12 +47,20 @@ public:
             return (IfStmt*)visit(ctx->expr());
         }
         else if(HexaCParser::StmtContext *ifStmt = ctx->stmt().at(0)){
-            return (Stmt*)visit(ctx->stmt().at(0));
+            return (IfStmt*)visit(ctx->stmt().at(0));
         }
         else if(HexaCParser::StmtContext *elseStmt = ctx->stmt().at(1)){
-            return (Stmt*)visit(ctx->stmt().at(1));
+            return (IfStmt*)visit(ctx->stmt().at(1));
         }
+    };
 
+    virtual antlrcpp::Any visitWhile_stmt(HexaCParser::While_stmtContext *ctx) override {
+        if(HexaCParser::ExprContext *cond_ctx = ctx->expr()){
+            return (WhileStmt*)visit(ctx->expr());
+        }
+        else if(HexaCParser::StmtContext *ifStmt = ctx->stmt()){
+            return (WhileStmt*)visit(ctx->stmt());
+        }
     };
 
     virtual antlrcpp::Any visitDecl(HexaCParser::DeclContext *ctx) override {
@@ -66,7 +74,6 @@ public:
 
                 BuiltinType::Kind kind = toKind(param->type()->type_id->getType());
                 params.push_back(new Param(param->getText(), new BuiltinType(kind)));
-
             }
 
             // TODO temp constructor BlockStmt
