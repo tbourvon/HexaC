@@ -13,20 +13,12 @@ using namespace antlr4;
 int main(int argc, const char* argv[]) {
 
   if(argc != 3 || argv[1] == "-h" || argv[1] == "-help"){
-    std::cout << "Usage of HexaCompiler : ./HexaC input.s outputName" << std::endl;
+    std::cout << "Usage of HexaCompiler : ./HexaC input.c outputName" << std::endl;
     return 1;
   }
 
   std::string inputFileName = argv[1];
-  std::string inputFileNameWithOExtension = inputFileName;
-  inputFileNameWithOExtension.pop_back();
-  inputFileNameWithOExtension += "o";
   std::string outputFileName = argv[2];
-
-  std::cout << inputFileName <<std::endl;
-  std::cout << inputFileNameWithOExtension<< std::endl;
-  std::cout << outputFileName<<std::endl;
-
 
   std::ifstream stream;
   stream.open(inputFileName);
@@ -42,12 +34,29 @@ int main(int argc, const char* argv[]) {
   AST ast(program);
   IR ir(program);
 
-  std::cout << ir.gen_asm() << std::endl;
+  std::string assemblyCode = ir.gen_asm();
+  std::cout << assemblyCode << std::endl;
+
+  std::ofstream outfile;
+  outfile.open(outputFileName+".s");
+  outfile << assemblyCode;
+  outfile.close();
+
+#ifdef GENEXEC
+    //as command
+    std::string asCommand = "as -o " + outputFileName+".o " + outputFileName+".s";
+    system(asCommand.c_str());
+
+    //gcc command
+    std::string gccCommand = "gcc " + outputFileName +".o -o " + outputFileName;
+    system(gccCommand.c_str());
+
+#endif
 
   ASTPrinter printer;
   printer.visitAST(&ast);
 
-  
+
   return 0;
 }
 

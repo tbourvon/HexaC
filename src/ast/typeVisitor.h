@@ -4,6 +4,7 @@
 #include <HexaCParserBaseVisitor.h>
 #include <HexaCLexer.h>
 #include "ast.h"
+#include "astVisitor.h"
 
 
 using namespace HexaC;
