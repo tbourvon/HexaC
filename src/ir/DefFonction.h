@@ -1,9 +1,0 @@
-//
-// Created by JC on 26/03/2018.
-//
-
-#ifndef ANTLR4CPP_FETCHER_DEFFONCTION_H
-#define ANTLR4CPP_FETCHER_DEFFONCTION_H
-class DefFonction;
-
-#endif //ANTLR4CPP_FETCHER_DEFFONCTION_H
