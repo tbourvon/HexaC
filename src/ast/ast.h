@@ -32,7 +32,10 @@ protected:
     Program* m_program;
 };
 
-class Type {};
+class Type {
+  public:
+  virtual ~Type() = default;
+};
 
 class BuiltinType : public Type {
 public:
@@ -84,7 +87,10 @@ protected:
   BlockStmt *m_body;
 };
 
-class Expr {};
+class Expr {
+public:
+  virtual ~Expr() = default;
+};
 class VarDecl : public Decl {
 public:
 VarDecl(const std::string &m_name, Type *m_type, Expr *m_initExpr)
