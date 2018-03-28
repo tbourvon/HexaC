@@ -5,6 +5,7 @@
 #include "HexaCParserBaseListener.h"
 #include "ast/astgenerator.h"
 #include "ast/astprinter.h"
+#include "ir/IRInstr.h"
 
 using namespace antlr4;
 
