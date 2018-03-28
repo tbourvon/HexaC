@@ -5,11 +5,12 @@
 #include "HexaCParserBaseListener.h"
 #include "ast/astgenerator.h"
 #include "ast/astprinter.h"
-#include "ir/IRInstr.h"
+#include "ir/IR.h"
 
 using namespace antlr4;
 
 int main(int argc, const char* argv[]) {
+
   std::ifstream stream;
   stream.open(argv[1]);
   ANTLRInputStream input(stream);
@@ -22,6 +23,9 @@ int main(int argc, const char* argv[]) {
   ASTGenerator astVisitor;
   Program *program = astVisitor.visit(tree);
   AST ast(program);
+  IR ir(program);
+
+  std::cout << ir.gen_asm() << std::endl;
 
   ASTPrinter printer;
   printer.visitAST(&ast);
