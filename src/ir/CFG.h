@@ -1,21 +1,26 @@
 #ifndef ANTLR4CPP_FETCHER_CFG_H
 #define ANTLR4CPP_FETCHER_CFG_H
 
-#include "BasicBlock.h"
-#include "DefFonction.h"
-
-class BasicBlock;
+#include "../ast/ast.h"
+#include <map>
+#include <string>
 
 class CFG {
     public:
-        CFG(DefFonction* ast);
+        CFG(FuncDecl *ast) : ast(ast) {}
 
-        DefFonction* ast; /**< The AST this CFG comes from */
+        FuncDecl* ast; /**< The AST this CFG comes from */
 
-        void add_bb(BasicBlock* bb);
+        //void add_bb(BasicBlock* bb);
 
         // x86 code generation: could be encapsulated in a processor class in a retargetable compiler
-        void gen_asm(std::ostream& o);
+        std::string gen_asm() {
+            std::string res;
+            res += ast->getName();
+            res += ":\r\n";
+            return res;
+        }
+
         std::string IR_reg_to_asm(std::string reg); /**< helper method: inputs a IR reg or input variable, returns e.g. "-24(%rbp)" for the proper value of 24 */
         void gen_asm_prologue(std::ostream& o);
         void gen_asm_epilogue(std::ostream& o);
@@ -28,15 +33,14 @@ class CFG {
 
         // basic block management
         std::string new_BB_name();
-        BasicBlock* current_bb;
+        //BasicBlock* current_bb;
 
     protected:
         std::map<std::string, Type> SymbolType; /**< part of the symbol table  */
         std::map<std::string, int> SymbolIndex; /**< part of the symbol table  */
         int nextFreeSymbolIndex; /**< to allocate new symbols in the symbol table */
         int nextBBnumber; /**< just for naming */
-
-        std::vector<BasicBlock*> bbs; /**< all the basic blocks of this CFG*/
+        //std::vector<BasicBlock*> bbs; /**< all the basic blocks of this CFG*/
 };
 
 #endif //ANTLR4CPP_FETCHER_CFG_H

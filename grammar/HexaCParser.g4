@@ -116,7 +116,7 @@ literal
   ;
 
 if_stmt
-  : IF OPEN_PAR expr CLOSE_PAR stmtofif=stmt (ELSE stmtofelse=stmt)?
+  : IF OPEN_PAR expr CLOSE_PAR stmt_if=stmt (ELSE stmt_else=stmt)?
   ;
 
 while_stmt
