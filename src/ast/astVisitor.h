@@ -11,6 +11,10 @@ public:
   typedef bool ErrorType;
 
   ASTVisitor();
+  virtual ErrorType visitAST(const AST *ast) {
+    visitProgram(ast->getProgram());
+  }
+
   virtual ErrorType visitProgram(const Program *program) {
     std::vector<Decl *> decls;
     for (int i = 0; i < decls.size(); i++) {
@@ -31,7 +35,7 @@ public:
   }
   virtual ErrorType visitExpr(const Expr *expr) {}
 
-  virtual ErrorType visitBlock(BlockStmt *block) {
+  virtual ErrorType visitBlock(const BlockStmt *block) {
     std::vector<Stmt *> stmts = block->getBody();
     for (int i = 0; i < stmts.size(); i++) {
       visitStmt(stmts[i]);
@@ -61,8 +65,6 @@ public:
           }
       }
   }
-
-  virtual ErrorType visitBlock(const BlockStmt *block) {}
 
 protected:
   Program *program;

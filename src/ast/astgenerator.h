@@ -11,7 +11,11 @@ using namespace HexaC;
 class ASTGenerator : public HexaCParserBaseVisitor
 {
 public:
-    ASTGenerator();
+    ASTGenerator() : m_topScopeNumber(0), m_currentScope(0) {
+        m_scopeDeclarationTable[0] = {
+            {"putchar", nullptr}
+        };
+    }
 
     virtual antlrcpp::Any visitProgram(HexaCParser::ProgramContext *ctx) override {
       std::vector<Decl*> decls;
@@ -27,7 +31,7 @@ public:
         if (HexaCParser::DeclContext *decl_ctx = ctx->decl()) {
             return (Decl*)visit(decl_ctx);
         } else {
-            return (Expr*)nullptr;
+            return (Decl*)nullptr;
         }
     }
 
@@ -87,6 +91,15 @@ public:
         }
     }
 
+    virtual antlrcpp::Any visitArg_list(HexaCParser::Arg_listContext *ctx) override {
+        std::vector<Expr*> exprs;
+        for (auto exprCtx : ctx->expr()) {
+            exprs.push_back(visit(exprCtx));
+        }
+
+        return exprs;
+    }
+
     virtual antlrcpp::Any visitLiteral(HexaCParser::LiteralContext *ctx) override {
         if (ctx->INT_LIT()) {
             return (Expr*)(new IntegerLiteral(stoi(ctx->INT_LIT()->getText())));
@@ -101,19 +114,19 @@ public:
 
     virtual antlrcpp::Any visitStmt(HexaCParser::StmtContext *ctx) override {
         if(HexaCParser::BlockContext *block_ctx = ctx->block()){
-            return (Stmt*)visit(ctx->block());
+            return (Stmt*)visit(ctx->block()).as<BlockStmt*>();
         }
         else if(HexaCParser::If_stmtContext *if_ctx = ctx->if_stmt()){
-            return (Stmt*)visit(ctx->if_stmt());
+            return (Stmt*)visit(ctx->if_stmt()).as<IfStmt*>();
         }
         else if(HexaCParser::While_stmtContext *while_ctx = ctx->while_stmt()){
-            return (Stmt*)visit(ctx->while_stmt());
+            return (Stmt*)visit(ctx->while_stmt()).as<WhileStmt*>();
         }
         else if(HexaCParser::Expr_stmtContext *expr_ctx = ctx->expr_stmt()){
-            return (Stmt*)visit(ctx->expr_stmt());
+            return (Stmt*)visit(ctx->expr_stmt()).as<ExprStmt*>();
         }
         else if(HexaCParser::Var_declContext *var_ctx = ctx->var_decl()){
-            return (Stmt*)(new DeclStmt((Decl*)visit(ctx->var_decl())));
+            return (Stmt*)(new DeclStmt((Decl*)visitVar_decl(var_ctx)));
         } else {
             return (Stmt*)nullptr;
         }
@@ -122,8 +135,8 @@ public:
 
     virtual antlrcpp::Any visitIf_stmt(HexaCParser::If_stmtContext *ctx) override {
         Expr* cond = visit(ctx->expr());
-        Stmt* ifStmt = visit(ctx->stmt().at(0));
-        Stmt* elseStmt = visit(ctx->stmt().at(1));
+        Stmt* ifStmt = visit(ctx->stmt_if);
+        Stmt* elseStmt = ctx->stmt_else ? (Stmt*)visit(ctx->stmt_else) : nullptr;
 
         return new IfStmt(cond, ifStmt, elseStmt);
     };
@@ -136,7 +149,13 @@ public:
     };
 
     virtual antlrcpp::Any visitBlock(HexaCParser::BlockContext *ctx) override {
+        int parentScope = m_currentScope;
+        m_scopeDeclarationTable[++m_topScopeNumber] = m_scopeDeclarationTable.at(parentScope);
+        m_currentScope = m_topScopeNumber;
+
         std::vector<Stmt*> stmtList = visit(ctx->stmt_list());
+
+        m_currentScope = parentScope;
 
         return new BlockStmt(stmtList);
     };
@@ -144,7 +163,7 @@ public:
     virtual antlrcpp::Any visitStmt_list(HexaCParser::Stmt_listContext *ctx) override {
         std::vector<Stmt*> stmts;
         for (auto stmtCtx : ctx->stmt()) {
-            stmts.push_back((Stmt*)visit(stmtCtx));
+            stmts.push_back(visit(stmtCtx));
         }
 
         return stmts;
@@ -161,31 +180,35 @@ public:
         std::vector<Param*> params;
         for(HexaCParser::ParamContext* param : paramsRaw) {
             BuiltinType::Kind kind = toKind(param->type()->type_id->getType());
-            params.push_back(new Param(param->getText(), new BuiltinType(kind)));
+            params.push_back(visit(param));
         }
         return params;
     }
 
     virtual antlrcpp::Any visitParam(HexaCParser::ParamContext *ctx) override {
         BuiltinType::Kind kind = toKind(ctx->type()->type_id->getType());
-        return new Param(ctx->getText(), new BuiltinType(kind));
+        return new Param(ctx->getText(), new BuiltinType(kind), nullptr); // FIXME: add default value
     }
 
     virtual antlrcpp::Any visitFunc_decl(HexaCParser::Func_declContext *ctx) override {
         BuiltinType::Kind kind = toKind(ctx->type()->type_id->getType());
-        return (Decl*)(new FuncDecl(ctx->ID()->getText(), new BuiltinType(kind), visitParam_list(ctx->param_list()), visitBlock(ctx->block())));
+        auto fd = new FuncDecl(ctx->ID()->getText(), new BuiltinType(kind), visitParam_list(ctx->param_list()), visitBlock(ctx->block()));
+        m_scopeDeclarationTable.at(m_currentScope)[fd->getName()] = fd;
+        return (Decl*)fd;
     }
 
     virtual antlrcpp::Any visitVar_decl(HexaCParser::Var_declContext *ctx) override {
         BuiltinType::Kind kind = toKind(ctx->type()->type_id->getType());
-        return (Decl*)(new VarDecl(ctx->ID()->getText(), new BuiltinType(kind), visitExpr(ctx->expr())));
+        auto vd = new VarDecl(ctx->ID()->getText(), new BuiltinType(kind), nullptr);
+        m_scopeDeclarationTable.at(m_currentScope)[vd->getName()] = vd;
+        return (Decl*)vd;
     }
 
     virtual antlrcpp::Any visitDecl(HexaCParser::DeclContext *ctx) override {
         if (HexaCParser::Func_declContext *func_ctx = ctx->func_decl()) {
-            visitFunc_decl(ctx->func_decl());
+            return (Decl*)visitFunc_decl(ctx->func_decl());
         } else if (HexaCParser::Var_declContext *var_ctx = ctx->var_decl()) {
-            visitVar_decl(ctx->var_decl());
+            return (Decl*)visitVar_decl(ctx->var_decl());
         } else {
             return (Decl*) nullptr;
         }

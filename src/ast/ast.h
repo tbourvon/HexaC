@@ -7,9 +7,8 @@
 class Decl {
 public:
 Decl(const std::string &m_name) : m_name(m_name) {}
-    Decl() {}
   virtual ~Decl() = default;
-  const std::string getExpr() const { return m_name; }
+  const std::string getName() const { return m_name; }
     
 
     protected:
@@ -32,28 +31,23 @@ protected:
     Program* m_program;
 };
 
-class Type {};
+class Type {
+public:
+    Type() {}
+    virtual ~Type() {}
+};
 
 class BuiltinType : public Type {
 public:
   enum class Kind { INT32_T, INT64_T, CHAR, VOID };
     Kind getKind() const { return m_kind; }
         
-        BuiltinType(Kind m_kind) : m_kind(m_kind) {}
+    BuiltinType(Kind m_kind) : m_kind(m_kind) {}
+
+    virtual ~BuiltinType() {}
 
     protected:
         Kind m_kind;
-};
-
-class Param {
-public:
-  const std::string getName() const { return m_name; }
-  const Type *getType() const { return m_type; }
-        Param(const std::string &m_name, Type *m_type) : m_name(m_name),
-                                                         m_type(m_type) {}
-    protected:
-        std::string m_name;
-    Type* m_type;
 };
 class Stmt {
   public:
@@ -66,6 +60,28 @@ public:
 
 protected:
   std::vector<Stmt *> m_body;
+};
+
+class Expr {};
+class VarDecl : public Decl {
+public:
+VarDecl(const std::string &m_name, Type *m_type, Expr *m_initExpr)
+                : Decl(m_name), m_type(m_type), m_initExpr(m_initExpr) {}
+  virtual ~VarDecl() = default;
+  const Type *getType() const { return m_type; }
+  const Expr *getExpr() const { return m_initExpr; }
+
+protected:
+
+  Type *m_type;
+  Expr *m_initExpr;
+};
+
+class Param : public VarDecl {
+public:
+    Param(const std::string &m_name, Type *m_type, Expr *m_initExpr)
+                : VarDecl(m_name, m_type, m_initExpr) {}
+
 };
 
 class FuncDecl : public Decl {
@@ -82,20 +98,6 @@ protected:
   Type *m_returnType;
   std::vector<Param *> m_params;
   BlockStmt *m_body;
-};
-
-class Expr {};
-class VarDecl : public Decl {
-public:
-VarDecl(const std::string &m_name, Type *m_type, Expr *m_initExpr)
-                : Decl(m_name), m_type(m_type), m_initExpr(m_initExpr) {}
-  const Type *getType() const { return m_type; }
-  const Expr *getExpr() const { return m_initExpr; }
-
-protected:
-
-  Type *m_type;
-  Expr *m_initExpr;
 };
 
 class DeclStmt : public Stmt {
