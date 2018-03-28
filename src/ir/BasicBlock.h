@@ -5,15 +5,17 @@
 #include <vector>
 #include <HexaCLexer.h>
 #include "CFG.h"
+#include "Operation.h"
 #include "IRInstr.h"
 
+class IRInstr;
 
 class BasicBlock {
     public:
         BasicBlock(CFG* cfg, std::string entry_label);
         void gen_asm(std::ostream &o); /**< x86 assembly code generation for this basic block (very simple) */
 
-        void add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::string> params);
+        void add_IRInstr(Operation op, Type t, std::vector<std::string> params);
 
         // No encapsulation whatsoever here. Feel free to do better.
         BasicBlock* exit_true;  /**< pointer to the next basic block, true branch. If nullptr, return from procedure */

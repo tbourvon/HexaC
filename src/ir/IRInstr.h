@@ -8,25 +8,13 @@
 #include <initializer_list>
 #include <HexaCLexer.h>
 #include "BasicBlock.h"
-
+#include "Operation.h"
 
 //! The class for one 3-address instruction
 class IRInstr {
 
     public:
         /** The instructions themselves -- feel free to subclass instead */
-        typedef enum {
-            ldconst,
-            add,
-            sub,
-            mul,
-            rmem,
-            wmem,
-            call,
-            cmp_eq,
-            cmp_lt,
-            cmp_le
-        } Operation;
 
 
         /**  constructor */

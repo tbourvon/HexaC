@@ -4,6 +4,8 @@
 #include "BasicBlock.h"
 #include "DefFonction.h"
 
+class BasicBlock;
+
 class CFG {
     public:
         CFG(DefFonction* ast);

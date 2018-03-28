@@ -4,6 +4,7 @@
 #include "HexaCParser.h"
 #include "HexaCParserBaseListener.h"
 #include "ast/astgenerator.h"
+#include "ast/astprinter.h"
 #include "ir/IRInstr.h"
 
 using namespace antlr4;
@@ -21,6 +22,9 @@ int main(int argc, const char* argv[]) {
   ASTGenerator astVisitor;
   Program *program = astVisitor.visit(tree);
   AST ast(program);
+
+  ASTPrinter printer;
+  printer.visitAST(&ast);
 
   return 0;
 }
