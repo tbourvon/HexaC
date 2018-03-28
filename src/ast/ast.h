@@ -61,6 +61,10 @@ protected:
   std::vector<Stmt *> m_body;
 };
 
+class Expr {
+public:
+  virtual ~Expr() = default;
+};
 
 class VarDecl : public Decl {
 public:
@@ -97,11 +101,6 @@ protected:
   Type *m_returnType;
   std::vector<Param *> m_params;
   BlockStmt *m_body;
-};
-
-class Expr {
-public:
-  virtual ~Expr() = default;
 };
 
 

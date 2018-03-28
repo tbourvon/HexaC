@@ -16,7 +16,7 @@ class CFG {
         // x86 code generation: could be encapsulated in a processor class in a retargetable compiler
         std::string gen_asm() {
             std::string res;
-            res += ast->getExpr();
+            res += ast->getName();
             res += ":\r\n";
             return res;
         }

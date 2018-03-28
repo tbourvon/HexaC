@@ -32,9 +32,8 @@ public:
   }
 
   virtual ErrorType visitFuncDecl(const FuncDecl *fd) {
-    std::vector<Param *> params = fd->getParams();
-    for (int i = 0; i < params.size(); i++) {
-      // visit params[i]
+    for (auto param : fd->getParams()) {
+      visitParam(param);
     }
     visitBlock(fd->getBlock());
   }
@@ -47,19 +46,38 @@ public:
     if (const BinaryOp *bo = dynamic_cast<const BinaryOp *>(expr)) {
       visitBinaryOp(bo);
     }
+    if (const UnaryOp *uo = dynamic_cast<const UnaryOp *>(expr)) {
+      visitUnaryOp(uo);
+    }
     if (const CallExpr *ce = dynamic_cast<const CallExpr *>(expr)) {
-      visitCallerExpr(ce);
+      visitCallExpr(ce);
     }
     if (const GroupExpr *ge = dynamic_cast<const GroupExpr *>(expr)) {
       visitGroupExpr(ge);
     }
     if (const LiteralExpr *le = dynamic_cast<const LiteralExpr *>(expr)) {
-    }
-    if (const IntegerLiteral *il = dynamic_cast<const IntegerLiteral *>(expr)) {
+      visitLiteralExpr(le);
     }
     if (const DeclRefExpr *dre = dynamic_cast<const DeclRefExpr *>(expr)) {
       visitDeclRefExpr(dre);
     }
+  }
+
+  virtual ErrorType visitLiteralExpr(const LiteralExpr *le) {
+    if (const IntegerLiteral *il = dynamic_cast<const IntegerLiteral *>(le)) {
+      visitIntegerLiteral(il);
+    }
+    if (const CharLiteral *cl = dynamic_cast<const CharLiteral *>(le)) {
+      visitCharLiteral(cl);
+    }
+  }
+
+  virtual ErrorType visitIntegerLiteral(const IntegerLiteral *il) {
+
+  }
+
+  virtual ErrorType visitCharLiteral(const CharLiteral *cl) {
+
   }
 
   virtual ErrorType visitBinaryOp(const BinaryOp *bo) {
@@ -67,8 +85,15 @@ public:
     visitExpr(bo->getRightHandSide());
   }
 
-  virtual ErrorType visitCallerExpr(const CallExpr *ce) {
+  virtual ErrorType visitUnaryOp(const UnaryOp *uo) {
+    visitExpr(uo->getExpr());
+  }
+
+  virtual ErrorType visitCallExpr(const CallExpr *ce) {
     visitExpr(ce->getCallee());
+    for (auto arg : ce->getArgs()) {
+      visitExpr(arg);
+    }
   }
 
   virtual ErrorType visitGroupExpr(const GroupExpr *ge) {
@@ -76,7 +101,6 @@ public:
   }
 
   virtual ErrorType visitDeclRefExpr(const DeclRefExpr *dre) {
-    visitDecl(dre->getDecl());
   }
 
   virtual ErrorType visitBlock(const BlockStmt *block) {
@@ -130,9 +154,9 @@ public:
     }
   }
 
-  virtual ErrorType visitBlock(const BlockStmt *block) {}
-
-  virtual ErrorType visitParam(const Param *param) {}
+  virtual ErrorType visitParam(const Param *param) {
+    visitExpr(param->getExpr());
+  }
 
   virtual BuiltinType::Kind getExpressionType(const Expr *expr) {
     if (const CallExpr *ce = dynamic_cast<const CallExpr *>(expr)) {

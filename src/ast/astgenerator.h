@@ -13,7 +13,7 @@ class ASTGenerator : public HexaCParserBaseVisitor
 public:
     ASTGenerator() : m_topScopeNumber(0), m_currentScope(0) {
         m_scopeDeclarationTable[0] = {
-            {"putchar", nullptr}
+            {"putchar", new FuncDecl("putchar", new BuiltinType(BuiltinType::Kind::VOID), {}, new BlockStmt({}))}
         };
     }
 

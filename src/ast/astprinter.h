@@ -21,8 +21,7 @@ public:
     popLevel();
   }
 
-  virtual ErrorType visitDecl(const Decl *decl) override {
-    if (const FuncDecl *fd = dynamic_cast<const FuncDecl *>(decl)) {
+  virtual ErrorType visitFuncDecl(const FuncDecl *fd) override {
       std::string printString = "FuncDecl '" + typeToString(fd->getType()) + " " + fd->getName() + "' (";
 
       std::vector<Param *> params = fd->getParams();
@@ -44,45 +43,76 @@ public:
       pushLevel();
       visitBlock(fd->getBlock());
       popLevel();
-    }
-    if (const VarDecl *vd = dynamic_cast<const VarDecl *>(decl)) {
-        prettyPrint("VarDecl '" + typeToString(vd->getType()) + " " + vd->getName() + "'");
-        pushLevel();
-        visitExpr(vd->getExpr());
-        popLevel();
-    }
   }
-  virtual ErrorType visitExpr(const Expr *expr) override {}
 
-  virtual ErrorType visitBlock(const BlockStmt *block) override {
+  virtual ErrorType visitVarDecl(const VarDecl *vd) override {
+      prettyPrint("VarDecl '" + typeToString(vd->getType()) + " " + vd->getName() + "'");
+      pushLevel();
+      visitExpr(vd->getExpr());
+      popLevel();
+  }
+
+  virtual ErrorType visitBlockStmt(const BlockStmt *block) override {
     std::vector<Stmt *> stmts = block->getBody();
     for (int i = 0; i < stmts.size(); i++) {
       visitStmt(stmts[i]);
     }
   }
 
-  virtual ErrorType visitStmt(const Stmt *stmt) override {
-      if (const DeclStmt *dStmt = dynamic_cast<const DeclStmt *>(stmt)) {
-        visitDecl(dStmt->getDecl());
-      }
-      if (const ExprStmt *eStmt = dynamic_cast<const ExprStmt *>(stmt)) {
-          visitExpr(eStmt->getExpr());
-      }
-      if (const IfStmt *ifStmt = dynamic_cast<const IfStmt *>(stmt)) {
-          visitExpr(ifStmt->getCond());
-          visitStmt(ifStmt->getStmt());
-          visitStmt(ifStmt->getElseStmt());
-      }
-      if (const WhileStmt *wStmt = dynamic_cast<const WhileStmt *>(stmt)) {
-          visitExpr(wStmt->getCond());
-          visitStmt(wStmt->getStmt());
-      }
-      if (const BlockStmt *bStmt = dynamic_cast<const BlockStmt *>(stmt)) {
-          std::vector<Stmt*> stmts = bStmt->getBody();
-          for(int i = 0; i < stmts.size(); i++){
-              visitStmt(stmts[i]);
-          }
-      }
+  virtual ErrorType visitBinaryOp(const BinaryOp *binop) override {
+    prettyPrint("BinaryOp '" + binopKindToString(binop->getKind()) + "'");
+    pushLevel();
+    visitExpr(binop->getLeftHandSide());
+    visitExpr(binop->getRightHandSide());
+    popLevel();
+  }
+
+  virtual ErrorType visitUnaryOp(const UnaryOp *unop) override {
+    prettyPrint("UnaryOp '" + unopKindToString(unop->getKind()) + "'");
+    pushLevel();
+    visitExpr(unop->getExpr());
+    popLevel();
+  }
+
+  virtual ErrorType visitDeclRefExpr(const DeclRefExpr *ref) {
+    prettyPrint("DeclRefExpr '" + ref->getDecl()->getName() + "'");
+  }
+
+  virtual ErrorType visitIntegerLiteral(const IntegerLiteral *intLit) {
+    prettyPrint("IntegerLiteral '" + std::to_string(intLit->getValue()) + "'");
+  }
+
+  virtual ErrorType visitCharLiteral(const CharLiteral *charLit) {
+    prettyPrint("CharLiteral '" + std::to_string(charLit->getValue()) + "'");
+  }
+
+  virtual ErrorType visitIfStmt(const IfStmt *ifStmt) {
+    prettyPrint("IfStmt");
+    pushLevel();
+    visitExpr(ifStmt->getCond());
+    visitStmt(ifStmt->getStmt());
+    if (ifStmt->getElseStmt()) {
+      visitStmt(ifStmt->getElseStmt());
+    }
+    popLevel();
+  }
+
+  virtual ErrorType visitIfStmt(const WhileStmt *whileStmt) {
+    prettyPrint("WhileStmt");
+    pushLevel();
+    visitExpr(whileStmt->getCond());
+    visitStmt(whileStmt->getStmt());
+    popLevel();
+  }
+
+  virtual ErrorType visitCallExpr(const CallExpr* ce) {
+    prettyPrint("CallExpr");
+    pushLevel();
+    visitExpr(ce->getCallee());
+    for (auto arg : ce->getArgs()) {
+      visitExpr(arg);
+    }
+    popLevel();
   }
 
 protected:
@@ -106,6 +136,42 @@ protected:
         case BuiltinType::Kind::INT64_T: return "int64_t";
         case BuiltinType::Kind::VOID: return "void";
       }
+    }
+  }
+
+  std::string binopKindToString(BinaryOp::Kind kind) {
+    switch (kind) {
+      case BinaryOp::Kind::ADD: return "+";
+      case BinaryOp::Kind::AND: return "&&";
+      case BinaryOp::Kind::ASSIGN: return "=";
+      case BinaryOp::Kind::ASSIGN_ADD: return "+=";
+      case BinaryOp::Kind::ASSIGN_DIV: return "/=";
+      case BinaryOp::Kind::ASSIGN_MOD: return "%=";
+      case BinaryOp::Kind::ASSIGN_MULT: return "*=";
+      case BinaryOp::Kind::ASSIGN_SUB: return "-=";
+      case BinaryOp::Kind::DIV: return "/";
+      case BinaryOp::Kind::EQ: return "==";
+      case BinaryOp::Kind::GE: return ">=";
+      case BinaryOp::Kind::GT: return ">";
+      case BinaryOp::Kind::LE: return "<=";
+      case BinaryOp::Kind::LT: return "<";
+      case BinaryOp::Kind::MOD: return "%";
+      case BinaryOp::Kind::MULT: return "*";
+      case BinaryOp::Kind::NEQ: return "!=";
+      case BinaryOp::Kind::OR: return "||";
+      case BinaryOp::Kind::SUB: return "-";
+    }
+  }
+
+  std::string unopKindToString(UnaryOp::Kind kind) {
+    switch (kind) {
+      case UnaryOp::Kind::MINUS: return "- (prefix)";
+      case UnaryOp::Kind::NOT: return "! (prefix)";
+      case UnaryOp::Kind::PLUS: return "+ (prefix)";
+      case UnaryOp::Kind::POST_DEC: return "-- (postfix)";
+      case UnaryOp::Kind::POST_INC: return "++ (postfix)";
+      case UnaryOp::Kind::PRE_DEC: return "-- (prefix)";
+      case UnaryOp::Kind::PRE_INC: return "++ (prefix)";
     }
   }
 
