@@ -6,31 +6,31 @@ IRInstr::IRInstr(BasicBlock* bb_, Operation op, Type* t, vector<string> params) 
 
 void IRInstr::gen_asm(ostream& out) {
   switch(op) {
-    case Operation.ldconst) :
-      int indexDest = bb->cfg->SymbolIndex.at(params[0]);
-      out << "movq $" << params[1] << "," << indexDest <<"(%rbp)";
-    case Operation.add :
-      int indexDest = bb->cfg->SymbolIndex.at(params[0]);
-      int indexParam1 = bb->cfg->SymbolIndex.at(params[1]);
-      int indexParam2 = bb->cfg->SymbolIndex.at(params[2]);
+      case Operation.ldconst) :
+        int indexDest = bb->cfg->SymbolIndex.at(params[0]);
+        out << "movq $" << params[1] << "," << indexDest <<"(%rbp)";
+      case Operation.add :
+        int indexDest = bb->cfg->get_var_index(params[0]);
+        int indexParam1 = bb->cfg->get_var_index(params[1]);
+        int indexParam2 = bb->cfg->get_var_index(params[2]);
+        out << "movq " << indexParam1 << "(%rbp), %rax";
+        out << "addq " << indexParam2 << "(%rbp), %rax";
+        out << "movq %rax, " << indexDest << "(%rbp)";
+      case Operation.sub :
+      int indexDest = bb->cfg->get_var_index(params[0]);
+      int indexParam1 = bb->cfg->get_var_index(params[1]);
+      int indexParam2 = bb->cfg->get_var_index(params[2]);
       out << "movq " << indexParam1 << "(%rbp), %rax";
-      out << "addq " << indexParam2 << "(%rbp), %rax";
+      out << "subq " << indexParam2 << "(%rbp), %rax";
       out << "movq %rax, " << indexDest << "(%rbp)";
-    case Operation.sub :
-    int indexDest = bb->cfg->SymbolIndex.at(params[0]);
-    int indexParam1 = bb->cfg->SymbolIndex.at(params[1]);
-    int indexParam2 = bb->cfg->SymbolIndex.at(params[2]);
-    out << "movq " << indexParam1 << "(%rbp), %rax";
-    out << "subq " << indexParam2 << "(%rbp), %rax";
-    out << "movq %rax, " << indexDest << "(%rbp)";
-    case Operation.mul :
-    case Operation.rmem :
-    case Operation.wmem :
-    case Operation.call :
-    case Operation.cmp_eq :
-    case Operation.cmp_lt :
-    case Operation.cmp_le :
-    case Operation.Operation :
+      case Operation.mul :
+      case Operation.rmem :
+      case Operation.wmem :
+      case Operation.call :
+      case Operation.cmp_eq :
+      case Operation.cmp_lt :
+      case Operation.cmp_le :
+      case Operation.Operation :
 
   }
 }
