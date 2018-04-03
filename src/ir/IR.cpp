@@ -4,11 +4,17 @@ IRInstr::IRInstr(BasicBlock* bb_, Operation op, Type* t, vector<string> params) 
 
 }
 
+bool IRInstr::isLastInstruction()
+{
+  return this == bb->instrs.back();
+}
+
 void IRInstr::gen_asm(ostream& out) {
-  int indexDest;
-  int indexParam1;
-  int indexParam2;
-  switch(op) {
+    int indexDest;
+    int indexParam1;
+    int indexParam2;
+
+    switch(op) {
       case Operation::ldconst :
           indexDest = bb->cfg->get_var_index(params[0]);
           out << "movq $" << params[1] << "," << indexDest <<"(%rbp)";
@@ -45,9 +51,19 @@ void IRInstr::gen_asm(ostream& out) {
     case Operation::call :
       break;
     case Operation::cmp_eq :
-        if()
-      indexDest = bb->cfg->get_var_index(params[0]);
-          indexParam1 = bb->cfg->get_var_index(params[1]);
+        if(!isLastInstruction)
+        {
+            indexDest = bb->cfg->get_var_index(params[0]);
+            indexParam1 = bb->cfg->get_var_index(params[1]);
+            indexParam2 = bb->cfg->get_var_index(params[2]);
+
+            out << 
+        }
+        else
+        {
+
+        }
+
       break;
     case Operation::cmp_lt :
       break;
