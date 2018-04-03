@@ -43,6 +43,7 @@ class TypeVisitor : public ASTVisitor {
   }
 
   virtual ErrorType visitUnaryOp(const UnaryOp *uo) {
+
     return (getExpressionType(uo->getExpr()) == BuiltinType::Kind::INT32_T) ||
             (getExpressionType(uo->getExpr()) == BuiltinType::Kind::INT64_T);
   }

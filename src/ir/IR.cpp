@@ -51,13 +51,12 @@ void IRInstr::gen_asm(ostream& out) {
     case Operation::call :
       break;
     case Operation::cmp_eq :
-        if(!isLastInstruction)
+        if(!isLastInstruction())
         {
             indexDest = bb->cfg->get_var_index(params[0]);
             indexParam1 = bb->cfg->get_var_index(params[1]);
             indexParam2 = bb->cfg->get_var_index(params[2]);
 
-            out << 
         }
         else
         {
