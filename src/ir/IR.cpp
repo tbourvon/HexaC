@@ -86,3 +86,7 @@ void CFG::gen_asm_epilogue(ostream& out) {
   out << "leave" << endl;
   out << "ret" << endl;
 }
+
+int CFG::get_var_index(string name) {
+  return SymbolIndex.at(name);
+}
