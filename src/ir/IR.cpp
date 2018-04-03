@@ -4,54 +4,46 @@ IRInstr::IRInstr(BasicBlock* bb_, Operation op, Type* t, vector<string> params) 
 
 }
 
-void IRInstr::gen_asm(ostream& out) {
-  int indexDest;
-  int indexParam1;
-  int indexParam2;
-  switch(op) {
-    case Operation.ldconst) :
-          indexDest = bb->cfg->get_var_index(params[0]);
-          out << "movq $" << params[1] << "," << indexDest <<"(%rbp)";
-          break;
-    case Operation.add :
-      indexDest = bb->cfg->get_var_index(params[0]);
-          indexParam1 = bb->cfg->get_var_index(params[1]);
-          indexParam2 = bb->cfg->get_var_index(params[2]);
-          out << "movq " << indexParam1 << "(%rbp), %rax";
-          out << "addq " << indexParam2 << "(%rbp), %rax";
-          out << "movq %rax, " << indexDest << "(%rbp)";
-          break;
-    case Operation.sub :
-      indexDest = bb->cfg->get_var_index(params[0]);
-          indexParam1 = bb->cfg->get_var_index(params[1]);
-          indexParam2 = bb->cfg->get_var_index(params[2]);
-          out << "movq " << indexParam1 << "(%rbp), %rax";
-          out << "subq " << indexParam2 << "(%rbp), %rax";
-          out << "movq %rax, " << indexDest << "(%rbp)";
-          break;
-    case Operation.mul :
-      indexDest = bb->cfg->get_var_index(params[0]);
-          indexParam1 = bb->cfg->get_var_index(params[1]);
-          indexParam2 = bb->cfg->get_var_index(params[2]);
-          out << "movq " << indexParam1 << "(%rbp)";
-          out << "multq " << indexParam2 << "(%rbp), %rax";
-          out << "movq %rax, " << indexDest << "(%rbp)";
-          break;
-    case Operation.rmem :
+bool IRInstr:isLastInstruction()
+{
+  return this == bb->instrs.back();
+}
 
-      break;
-    case Operation.wmem :
-      break;
-    case Operation.call :
-      break;
-    case Operation.cmp_eq :
-      break;
-    case Operation.cmp_lt :
-      break;
-    case Operation.cmp_le :
-      break;
-    case Operation.Operation :
-      break;
+void IRInstr::gen_asm(ostream& out) {
+  switch(op) {
+      case Operation.ldconst) :
+        int indexDest = bb->cfg->SymbolIndex.at(params[0]);
+        out << "movq $" << params[1] << "," << indexDest <<"(%rbp)";
+      case Operation.add :
+        int indexDest = bb->cfg->get_var_index(params[0]);
+        int indexParam1 = bb->cfg->get_var_index(params[1]);
+        int indexParam2 = bb->cfg->get_var_index(params[2]);
+        out << "movq " << indexParam1 << "(%rbp), %rax";
+        out << "addq " << indexParam2 << "(%rbp), %rax";
+        out << "movq %rax, " << indexDest << "(%rbp)";
+      case Operation.sub :
+      int indexDest = bb->cfg->get_var_index(params[0]);
+      int indexParam1 = bb->cfg->get_var_index(params[1]);
+      int indexParam2 = bb->cfg->get_var_index(params[2]);
+      out << "movq " << indexParam1 << "(%rbp), %rax";
+      out << "subq " << indexParam2 << "(%rbp), %rax";
+      out << "movq %rax, " << indexDest << "(%rbp)";
+      case Operation.mul :
+      case Operation.rmem :
+      case Operation.wmem :
+      case Operation.call :
+      case Operation.cmp_eq :
+        if(!isLastInstruction)
+        {
+          
+        }
+        else
+        {
+
+        }
+      case Operation.cmp_lt :
+      case Operation.cmp_le :
+      case Operation.Operation :
 
   }
 }
