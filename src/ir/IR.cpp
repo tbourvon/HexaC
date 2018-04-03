@@ -13,11 +13,13 @@ void BasicBlock::gen_asm(ostream& out) {
     cfg->gen_asm_prologue(out);
   }
 
+  out << label << ":";
+
   for (auto instr : instrs) {
     instr->gen_asm(out);
   }
 
-  if (!exit_true) {
+  if (!exit_true && !exit_false) {
     cfg->gen_asm_epilogue(out);
   }
   // TODO: truc bizarre des deux jumps conditionnels
