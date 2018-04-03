@@ -9,11 +9,11 @@ void IRInstr::gen_asm(ostream& out) {
   int indexParam1;
   int indexParam2;
   switch(op) {
-    case Operation.ldconst) :
+      case Operation::ldconst :
           indexDest = bb->cfg->get_var_index(params[0]);
           out << "movq $" << params[1] << "," << indexDest <<"(%rbp)";
           break;
-    case Operation.add :
+      case Operation::add :
       indexDest = bb->cfg->get_var_index(params[0]);
           indexParam1 = bb->cfg->get_var_index(params[1]);
           indexParam2 = bb->cfg->get_var_index(params[2]);
@@ -21,7 +21,7 @@ void IRInstr::gen_asm(ostream& out) {
           out << "addq " << indexParam2 << "(%rbp), %rax";
           out << "movq %rax, " << indexDest << "(%rbp)";
           break;
-    case Operation.sub :
+    case Operation::sub :
       indexDest = bb->cfg->get_var_index(params[0]);
           indexParam1 = bb->cfg->get_var_index(params[1]);
           indexParam2 = bb->cfg->get_var_index(params[2]);
@@ -29,7 +29,7 @@ void IRInstr::gen_asm(ostream& out) {
           out << "subq " << indexParam2 << "(%rbp), %rax";
           out << "movq %rax, " << indexDest << "(%rbp)";
           break;
-    case Operation.mul :
+    case Operation::mul :
       indexDest = bb->cfg->get_var_index(params[0]);
           indexParam1 = bb->cfg->get_var_index(params[1]);
           indexParam2 = bb->cfg->get_var_index(params[2]);
@@ -37,22 +37,22 @@ void IRInstr::gen_asm(ostream& out) {
           out << "multq " << indexParam2 << "(%rbp), %rax";
           out << "movq %rax, " << indexDest << "(%rbp)";
           break;
-    case Operation.rmem :
+    case Operation::rmem :
 
       break;
-    case Operation.wmem :
+    case Operation::wmem :
       break;
-    case Operation.call :
+    case Operation::call :
       break;
-    case Operation.cmp_eq :
+    case Operation::cmp_eq :
+        if()
+      indexDest = bb->cfg->get_var_index(params[0]);
+          indexParam1 = bb->cfg->get_var_index(params[1]);
       break;
-    case Operation.cmp_lt :
+    case Operation::cmp_lt :
       break;
-    case Operation.cmp_le :
+    case Operation::cmp_le :
       break;
-    case Operation.Operation :
-      break;
-
   }
 }
 
