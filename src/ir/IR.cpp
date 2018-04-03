@@ -1,15 +1,78 @@
 #include "IR.h"
 
-IRInstr::IRInstr(BasicBlock* bb_, Operation op, const Type* t, vector<string> params) {
+IRInstr::IRInstr(BasicBlock* bb_, Operation op_, const Type* t_, vector<string> params_) : bb(bb_), op(op_), t(t_), params(params_) {
 
+}
+
+bool IRInstr::isLastInstruction()
+{
+  return this == bb->instrs.back();
 }
 
 void IRInstr::gen_asm(ostream& out) {
+    int indexDest;
+    int indexParam1;
+    int indexParam2;
 
+    switch(op) {
+      case Operation::ldconst :
+          indexDest = bb->cfg->get_var_index(params[0]);
+          out << "movq $" << params[1] << "," << indexDest <<"(%rbp)" << endl;
+          break;
+      case Operation::add :
+      indexDest = bb->cfg->get_var_index(params[0]);
+          indexParam1 = bb->cfg->get_var_index(params[1]);
+          indexParam2 = bb->cfg->get_var_index(params[2]);
+          out << "movq " << indexParam1 << "(%rbp), %rax" << endl;
+          out << "addq " << indexParam2 << "(%rbp), %rax" << endl;
+          out << "movq %rax, " << indexDest << "(%rbp)" << endl;
+          break;
+    case Operation::sub :
+      indexDest = bb->cfg->get_var_index(params[0]);
+          indexParam1 = bb->cfg->get_var_index(params[1]);
+          indexParam2 = bb->cfg->get_var_index(params[2]);
+          out << "movq " << indexParam1 << "(%rbp), %rax" << endl;
+          out << "subq " << indexParam2 << "(%rbp), %rax" << endl;
+          out << "movq %rax, " << indexDest << "(%rbp)" << endl;
+          break;
+    case Operation::mul :
+      indexDest = bb->cfg->get_var_index(params[0]);
+          indexParam1 = bb->cfg->get_var_index(params[1]);
+          indexParam2 = bb->cfg->get_var_index(params[2]);
+          out << "movq " << indexParam1 << "(%rbp)";
+          out << "multq " << indexParam2 << "(%rbp), %rax" << endl;
+          out << "movq %rax, " << indexDest << "(%rbp)" << endl;
+          break;
+    case Operation::rmem :
+
+      break;
+    case Operation::wmem :
+      break;
+    case Operation::call :
+      break;
+    case Operation::cmp_eq :
+        if(!isLastInstruction())
+        {
+            indexDest = bb->cfg->get_var_index(params[0]);
+            indexParam1 = bb->cfg->get_var_index(params[1]);
+            indexParam2 = bb->cfg->get_var_index(params[2]);
+
+        }
+        else
+        {
+
+        }
+
+      break;
+    case Operation::cmp_lt :
+      break;
+    case Operation::cmp_le :
+      break;
+  }
 }
 
 void BasicBlock::gen_asm(ostream& out) {
-  out << label << ":" << endl;
+  out << endl << label << ":" << endl;
 
   if (label == cfg->ast->getName()) {
     cfg->gen_asm_prologue(out);
@@ -47,6 +110,9 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
   lastBB->exit_true = nullptr;
 
   current_bb = firstBB;
+
+  SymbolType["!bp"] = new BuiltinType(BuiltinType::Kind::VOID);
+  SymbolIndex["!bp"] = 0;
 }
 
 std::string CFG::new_BB_name() {
@@ -66,7 +132,7 @@ std::string CFG::create_new_tempvar(const Type* t) {
   SymbolType[name] = t;
   SymbolIndex[name] = nextFreeSymbolIndex;
 
-  nextFreeSymbolIndex += get_size_for_type(t);
+  nextFreeSymbolIndex -= get_size_for_type(t);
 
   return name;
 }
@@ -75,7 +141,7 @@ void CFG::add_to_symbol_table(string name, const Type* t) {
   SymbolType[name] = t;
   SymbolIndex[name] = nextFreeSymbolIndex;
 
-  nextFreeSymbolIndex += get_size_for_type(t);
+  nextFreeSymbolIndex -= get_size_for_type(t);
 }
 
 void CFG::gen_asm(ostream& out) {
@@ -97,6 +163,7 @@ void CFG::gen_asm_prologue(ostream& out) {
 }
 
 void CFG::gen_asm_epilogue(ostream& out) {
+  out << endl;
   out << "leave" << endl;
   out << "ret" << endl;
 }
