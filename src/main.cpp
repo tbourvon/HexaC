@@ -12,7 +12,7 @@ using namespace antlr4;
 
 int main(int argc, const char* argv[]) {
 
-  if(argc != 3 || argv[1] == "-h" || argv[1] == "-help"){
+  if(argc != 3 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0) {
     std::cout << "Usage of HexaCompiler : ./HexaC input.c outputName" << std::endl;
     return 1;
   }
@@ -32,7 +32,7 @@ int main(int argc, const char* argv[]) {
   ASTGenerator astVisitor;
   Program *program = astVisitor.visit(tree);
   AST ast(program);
-  IR ir(program);
+  /*IR ir(&ast);
 
   std::string assemblyCode = ir.gen_asm();
   std::cout << assemblyCode << std::endl;
@@ -52,6 +52,7 @@ int main(int argc, const char* argv[]) {
     system(gccCommand.c_str());
 
 #endif
+  */
 
   ASTPrinter printer;
   printer.visitAST(&ast);
