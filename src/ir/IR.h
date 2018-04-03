@@ -36,7 +36,7 @@ class IRInstr {
 
 
 	/**  constructor */
-	IRInstr(BasicBlock* bb_, Operation op, Type* t, vector<string> params);
+	IRInstr(BasicBlock* bb_, Operation op, const Type* t, vector<string> params);
 	
 	/** Actual code generation */
 	void gen_asm(ostream &o); /**< x86 assembly code generation for this IR instruction */
@@ -70,10 +70,10 @@ class IRInstr {
 
 class BasicBlock {
  public:
-	BasicBlock(CFG* cfg, string entry_label);
+	BasicBlock(CFG* cfg, string _entry_label);
 	void gen_asm(ostream &o); /**< x86 assembly code generation for this basic block (very simple) */
 
-	void add_IRInstr(IRInstr::Operation op, Type* t, vector<string> params);
+	void add_IRInstr(IRInstr::Operation op, const Type* t, vector<string> params);
 
 	// No encapsulation whatsoever here. Feel free to do better.
 	BasicBlock* exit_true;  /**< pointer to the next basic block, true branch. If nullptr, return from procedure */ 
@@ -100,9 +100,9 @@ class BasicBlock {
  */
 class CFG {
  public:
-	CFG(FuncDecl* ast);
+	CFG(const FuncDecl* _ast);
 
-	FuncDecl* ast; /**< The AST this CFG comes from */
+	const FuncDecl* ast; /**< The AST this CFG comes from */
 	
 	void add_bb(BasicBlock* bb); 
 
@@ -113,23 +113,24 @@ class CFG {
 	void gen_asm_epilogue(ostream& o);
 
 	// symbol table methods
-	void add_to_symbol_table(string name, Type* t);
-	string create_new_tempvar(Type* t);
+	void add_to_symbol_table(string name, const Type* t);
+	string create_new_tempvar(const Type* t);
 	int get_var_index(string name);
 	Type get_var_type(string name);
+
+	int get_size_for_type(const Type* t);
 
 	// basic block management
 	string new_BB_name();
 	BasicBlock* current_bb;
 
  protected:
-	map <string, Type*> SymbolType; /**< part of the symbol table  */
+	map <string, const Type*> SymbolType; /**< part of the symbol table  */
 	map <string, int> SymbolIndex; /**< part of the symbol table  */
 	int nextFreeSymbolIndex; /**< to allocate new symbols in the symbol table */
 	int nextBBnumber; /**< just for naming */
 	
 	vector <BasicBlock*> bbs; /**< all the basic blocks of this CFG*/
 };
-
 
 #endif

@@ -35,7 +35,7 @@ public:
     for (auto param : fd->getParams()) {
       visitParam(param);
     }
-    visitBlock(fd->getBlock());
+    visitBlockStmt(fd->getBlock());
   }
 
   virtual ErrorType visitVarDecl(const VarDecl *vd) {
@@ -103,13 +103,6 @@ public:
   virtual ErrorType visitDeclRefExpr(const DeclRefExpr *dre) {
   }
 
-  virtual ErrorType visitBlock(const BlockStmt *block) {
-    std::vector<Stmt *> stmts = block->getBody();
-    for (int i = 0; i < stmts.size(); i++) {
-      visitStmt(stmts[i]);
-    }
-  }
-
   virtual ErrorType visitStmt(const Stmt *stmt) {
     if (const DeclStmt *dStmt = dynamic_cast<const DeclStmt *>(stmt)) {
       visitDeclStmt(dStmt);
@@ -158,7 +151,7 @@ public:
     visitExpr(param->getExpr());
   }
 
-  virtual BuiltinType::Kind getExpressionType(const Expr *expr) {
+  virtual const Type* getExpressionType(const Expr *expr) {
     if (const CallExpr *ce = dynamic_cast<const CallExpr *>(expr)) {
       return getExpressionType(ce->getCallee());
     }
@@ -168,26 +161,22 @@ public:
     }
 
     if (const LiteralExpr *le = dynamic_cast<const LiteralExpr *>(expr)) {
-      return BuiltinType::Kind::CHAR;
+      return new BuiltinType(BuiltinType::Kind::CHAR);
     }
 
     if (const IntegerLiteral *il = dynamic_cast<const IntegerLiteral *>(expr)) {
-      return BuiltinType::Kind::INT64_T;
+      return new BuiltinType(BuiltinType::Kind::INT64_T);
     }
 
     if (const DeclRefExpr *dre = dynamic_cast<const DeclRefExpr *>(expr)) {
       const Decl *d = dre->getDecl();
       if (const VarDecl *vd = dynamic_cast<const VarDecl *>(dre)) {
         const Type *type = vd->getType();
-        if (const BuiltinType *bit = dynamic_cast<const BuiltinType *>(type)) {
-          return bit->getKind();
-        }
+        return type;
       }
       if (const FuncDecl *fd = dynamic_cast<const FuncDecl *>(dre)) {
         const Type *type = fd->getType();
-        if (const BuiltinType *bit = dynamic_cast<const BuiltinType *>(type)) {
-          return bit->getKind();
-        }
+        return type;
       }
     }
   }

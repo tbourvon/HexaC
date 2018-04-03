@@ -11,7 +11,7 @@ using namespace HexaC;
 class ASTGenerator : public HexaCParserBaseVisitor
 {
 public:
-    ASTGenerator() : m_topScopeNumber(0), m_currentScope(0) {
+    ASTGenerator() : m_topScopeNumber(0), m_currentScope(0), m_nextDeclRefIsLvalue(false) {
         m_scopeDeclarationTable[0] = {
             {"putchar", new FuncDecl("putchar", new BuiltinType(BuiltinType::Kind::VOID), {}, new BlockStmt({}))}
         };
@@ -37,7 +37,9 @@ public:
 
     virtual antlrcpp::Any visitExpr(HexaCParser::ExprContext *ctx) override {
         if (ctx->bin_op) {
+            m_nextDeclRefIsLvalue = true;
             Expr* lhs = visit(ctx->bin_lhs);
+            m_nextDeclRefIsLvalue = false;
             Expr* rhs = visit(ctx->bin_rhs);
 
             BinaryOp::Kind kind;
@@ -65,7 +67,12 @@ public:
 
             return (Expr*)(new BinaryOp(kind, lhs, rhs));
         } else if (ctx->un_op) {
+            if (!ctx->postfix) {
+                m_nextDeclRefIsLvalue = true;
+            }
+
             Expr* expr = visit(ctx->un_expr);
+            m_nextDeclRefIsLvalue = false;
 
             UnaryOp::Kind kind;
             switch (ctx->un_op->getType()) {
@@ -106,7 +113,7 @@ public:
         } else if (ctx->CHAR_LIT()) {
             return (Expr*)(new CharLiteral(ctx->CHAR_LIT()->getText()[1]));
         } else if (ctx->ID()) {
-            return (Expr*)(new DeclRefExpr(getDeclByName(ctx->ID()->getText())));
+            return (Expr*)(new DeclRefExpr(getDeclByName(ctx->ID()->getText()), m_nextDeclRefIsLvalue ? DeclRefExpr::Kind::LVALUE : DeclRefExpr::Kind::RVALUE));
         }
 
         return nullptr;
@@ -226,6 +233,8 @@ protected:
         auto table = m_scopeDeclarationTable.at(m_currentScope);
         return table.at(name);
     }
+
+    bool m_nextDeclRefIsLvalue;
 
     int m_topScopeNumber;
     int m_currentScope;

@@ -240,11 +240,18 @@ protected:
 
 class DeclRefExpr : public Expr {
 public:
-    DeclRefExpr(Decl* decl) : m_decl(decl) {}
+    enum class Kind {
+      RVALUE,
+      LVALUE
+    };
+
+    DeclRefExpr(Decl* decl, Kind kind) : m_decl(decl), m_kind(kind) {}
     const Decl *getDecl() const { return m_decl; }
+    Kind getKind() const { return m_kind; }
 
 protected:
     Decl *m_decl;
+    Kind m_kind;
 };
 
 #endif // AST_H

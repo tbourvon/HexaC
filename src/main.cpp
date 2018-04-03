@@ -7,6 +7,7 @@
 #include "ast/astgenerator.h"
 #include "ast/astprinter.h"
 #include "ir/IR.h"
+#include "ir/irgenerator.h"
 
 using namespace antlr4;
 
@@ -32,9 +33,27 @@ int main(int argc, const char* argv[]) {
   ASTGenerator astVisitor;
   Program *program = astVisitor.visit(tree);
   AST ast(program);
-  /*IR ir(&ast);
 
-  std::string assemblyCode = ir.gen_asm();
+  ASTPrinter printer;
+  printer.visitAST(&ast);
+
+  IRGenerator irg;
+  auto cfgs = irg.generateIR(&ast);
+
+  std::stringstream assembly;
+
+  assembly << ".text" << std::endl;
+  assembly << ".global main" << std::endl;
+  assembly << std::endl;
+
+  for (auto cfg : cfgs) {
+    cfg->gen_asm(assembly);
+  }
+
+  std::cout << assembly.str();
+
+
+  /*std::string assemblyCode = ir.gen_asm();
   std::cout << assemblyCode << std::endl;
 
   std::ofstream outfile;
@@ -53,9 +72,6 @@ int main(int argc, const char* argv[]) {
 
 #endif
   */
-
-  ASTPrinter printer;
-  printer.visitAST(&ast);
 
 
   return 0;

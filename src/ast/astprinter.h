@@ -41,7 +41,7 @@ public:
       prettyPrint(printString);
 
       pushLevel();
-      visitBlock(fd->getBlock());
+      visitBlockStmt(fd->getBlock());
       popLevel();
   }
 
@@ -97,7 +97,7 @@ public:
     popLevel();
   }
 
-  virtual ErrorType visitIfStmt(const WhileStmt *whileStmt) {
+  virtual ErrorType visitWhileStmt(const WhileStmt *whileStmt) {
     prettyPrint("WhileStmt");
     pushLevel();
     visitExpr(whileStmt->getCond());
