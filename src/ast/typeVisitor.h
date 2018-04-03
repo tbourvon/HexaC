@@ -31,7 +31,7 @@ class TypeVisitor : public ASTVisitor {
           }
           int i = 0;
           for(auto param : args){
-            if(getExpressionType(param) != getExpressionType(args[i]){
+            if(getExpressionType(param) != getExpressionType(args[i])){
               return false;
             }
             i++;
@@ -42,9 +42,9 @@ class TypeVisitor : public ASTVisitor {
     return false;
   }
 
-  virtual ErrorTypr visitUnaryOp(const UnaryOp *uo) {
-    return (getExpressionType(uo->getExpr() == BuiltinType::Kind::INT32_T) || 
-            (getExpressionType(uo->getExpr() == BuiltinType::Kind::INT64_T);
+  virtual ErrorType visitUnaryOp(const UnaryOp *uo) {
+    return (getExpressionType(uo->getExpr()) == BuiltinType::Kind::INT32_T) || 
+            (getExpressionType(uo->getExpr()) == BuiltinType::Kind::INT64_T);
   }
 }
 ;
