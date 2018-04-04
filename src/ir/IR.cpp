@@ -75,33 +75,43 @@ void IRInstr::gen_asm(ostream& out) {
             break;
 
         case Operation::call : {
-            std::string funcToCall = params[1];
-            if(funcToCall == "putchar") {
-#ifdef __APPLE__
-                funcToCall = "_putchar";
-#endif
-            }
+      std::string funcToCall = params[1];
+      if(funcToCall == "putchar") {
+        #ifdef __APPLE__
+          funcToCall = "_putchar";
+        #endif
+      }
 
-            indexDest = bb->cfg->get_var_index(params[0]);
-            indexParam1 = bb->cfg->get_var_index(params[1]);
-            //indexParam2 = bb->cfg->get_var_index(params[2]);
-            //out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
+      indexDest = bb->cfg->get_var_index(params[0]);
+      //indexParam2 = bb->cfg->get_var_index(params[2]);
+      //out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
 
-            for (int i = 2; i < params.size(); i++) {
-                switch(i-2) {
-                    case 0: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rdi" << endl; break;
-                    case 1: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rsi" << endl; break;
-                    case 2: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rdx" << endl; break;
-                    case 3: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rcx" << endl; break;
-                    case 4: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %r8" << endl; break;
-                    case 5: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %rç" << endl; break;
-                }
-            }
+      for (int i = 2; i < params.size(); i++) {
+          switch(i-2) {
+              case 0: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rdi" << endl; break;
+              case 1: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rsi" << endl; break;
+              case 2: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rdx" << endl; break;
+              case 3: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rcx" << endl; break;
+              case 4: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %r8" << endl; break;
+              case 5: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %rç" << endl; break;
+          }
+      }
 
-            out << "movb $0, %al" << endl;
-            out << "callq " << funcToCall << endl;
-            break;
-        }
+      out << "movb $0, %al" << endl;
+      out << "callq " << funcToCall << endl;
+      if (dynamic_cast<const BuiltinType*>(t)->getKind() != BuiltinType::Kind::VOID) {
+        out << "movl %eax, " << indexDest << "(%rbp)" << endl;
+      }
+      break;
+    }
+    case Operation::ret :
+      if (!params.empty()) {
+        indexDest = bb->cfg->get_var_index(params[0]);
+        out << "movl" << indexDest <<"(%rbp), %eax" << endl;
+      }
+
+      out << "jmp " << bb->cfg->out_bb->label << endl;
+      break;
 
         case Operation::cmp_eq :
             if(!isLastInstruction())
@@ -189,8 +199,9 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
     auto firstBB = new BasicBlock(this, ast->getName());
     add_bb(firstBB);
 
-    auto lastBB = new BasicBlock(this, new_BB_name());
-    add_bb(lastBB);
+  auto lastBB = new BasicBlock(this, new_BB_name());
+  add_bb(lastBB);
+  out_bb = lastBB;
 
     firstBB->exit_false = nullptr;
     firstBB->exit_true = lastBB;
@@ -200,15 +211,11 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
 
     current_bb = firstBB;
 
-    SymbolType["!bp"] = new BuiltinType(BuiltinType::Kind::VOID);
-    SymbolIndex["!bp"] = 0;
-
-    SymbolType["putchar"] = new BuiltinType(BuiltinType::Kind::VOID);
-    SymbolIndex["putchar"] = 0;
+  SymbolType["!bp"] = new BuiltinType(BuiltinType::Kind::VOID);
+  SymbolIndex["!bp"] = 0;
 }
 
 std::string CFG::new_BB_name() {
-  //return "bb" + std::to_string(nextBBnumber++);
   return ast->getName() + "_bb" + std::to_string(nextBBnumber++);
 }
 

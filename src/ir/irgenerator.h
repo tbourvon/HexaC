@@ -236,6 +236,15 @@ public:
     return temp;
   }
 
+  virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) {
+    if (returnStmt->getExpr()) {
+      std::string temp = visitExprIR(returnStmt->getExpr());
+      m_currentCFG->current_bb->add_IRInstr(IRInstr::ret, new BuiltinType(BuiltinType::Kind::INT32_T), {temp});
+    } else {
+      m_currentCFG->current_bb->add_IRInstr(IRInstr::ret, new BuiltinType(BuiltinType::Kind::VOID), {});
+    }
+  }
+
 protected:
   std::vector<CFG*> m_cfgs;
   CFG* m_currentCFG;
