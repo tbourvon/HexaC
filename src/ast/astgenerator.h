@@ -69,12 +69,7 @@ public:
 
             return (Expr*)(new BinaryOp(kind, lhs, rhs));
         } else if (ctx->un_op) {
-            if (!ctx->postfix) {
-                m_nextDeclRefIsLvalue = true;
-            }
-
             Expr* expr = visit(ctx->un_expr);
-            m_nextDeclRefIsLvalue = false;
 
             UnaryOp::Kind kind;
             switch (ctx->un_op->getType()) {

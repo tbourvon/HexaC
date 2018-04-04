@@ -183,6 +183,10 @@ public:
     if (const BinaryOp *binop = dynamic_cast<const BinaryOp *>(expr)) {
       return new BuiltinType(BuiltinType::Kind::INT64_T);
     }
+
+    if (const UnaryOp *unop = dynamic_cast<const UnaryOp *>(expr)) {
+      return new BuiltinType(BuiltinType::Kind::INT64_T);
+    }
   }
 
 protected:
