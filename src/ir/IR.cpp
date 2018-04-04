@@ -73,12 +73,20 @@ void IRInstr::gen_asm(ostream& out) {
           out << "movq %r10, (%rax)" << endl;
       break;
     case Operation::call :
+      std::string funcToCall = params[1];
+      if(funcToCall == "putchar")
+      {
+        #ifdef __APPLE__
+          funcToCall = "_putchar";
+        #endif
+      }
+
       indexDest = bb->cfg->get_var_index(params[0]);
       indexParam1 = bb->cfg->get_var_index(params[1]);
       indexParam2 = bb->cfg->get_var_index(params[2]);
       out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
       out << "movb $0, %al" << endl;
-      out << "callq " << params[1] << endl;
+      out << "callq " << funcToCall << endl;
       break;
     case Operation::cmp_eq :
         if(!isLastInstruction())
@@ -86,6 +94,7 @@ void IRInstr::gen_asm(ostream& out) {
             indexDest = bb->cfg->get_var_index(params[0]);
             indexParam1 = bb->cfg->get_var_index(params[1]);
             indexParam2 = bb->cfg->get_var_index(params[2]);
+
         }
         else
         {
@@ -106,6 +115,11 @@ void IRInstr::gen_asm(ostream& out) {
 }
 
 void BasicBlock::gen_asm(ostream& out) {
+  if(label == "main"){
+    #ifdef __APPLE__
+      label = "_main";
+    #endif
+  }
   out << endl << label << ":" << endl;
 
   if (label == cfg->ast->getName()) {
@@ -224,8 +238,8 @@ int CFG::get_size_for_type(const Type* t) {
   }
 
   switch (builtin->getKind()) {
-    case BuiltinType::Kind::CHAR: return 8;
-    case BuiltinType::Kind::INT32_T: return 8;
+    case BuiltinType::Kind::CHAR: return 4;
+    case BuiltinType::Kind::INT32_T: return 4;
     case BuiltinType::Kind::INT64_T: return 8;
     case BuiltinType::Kind::VOID: return 0;
   }
