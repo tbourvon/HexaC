@@ -32,6 +32,7 @@ class IRInstr {
 		cmp_eq,
 		cmp_lt,
 		cmp_le,
+		ret
 	} Operation;
 
 
@@ -125,6 +126,8 @@ class CFG {
 	// basic block management
 	string new_BB_name();
 	BasicBlock* current_bb;
+
+	BasicBlock* out_bb;
 
  protected:
 	map <string, const Type*> SymbolType; /**< part of the symbol table  */

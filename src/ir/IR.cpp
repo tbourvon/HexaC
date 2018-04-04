@@ -81,7 +81,6 @@ void IRInstr::gen_asm(ostream& out) {
       }
 
       indexDest = bb->cfg->get_var_index(params[0]);
-      indexParam1 = bb->cfg->get_var_index(params[1]);
       //indexParam2 = bb->cfg->get_var_index(params[2]);
       //out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
 
@@ -98,8 +97,19 @@ void IRInstr::gen_asm(ostream& out) {
 
       out << "movb $0, %al" << endl;
       out << "callq " << funcToCall << endl;
+      if (dynamic_cast<const BuiltinType*>(t)->getKind() != BuiltinType::Kind::VOID) {
+        out << "movl %eax, " << indexDest << "(%rbp)" << endl;
+      }
       break;
     }
+    case Operation::ret :
+      if (!params.empty()) {
+        indexDest = bb->cfg->get_var_index(params[0]);
+        out << "movl" << indexDest <<"(%rbp), %eax" << endl;
+      }
+
+      out << "jmp " << bb->cfg->out_bb->label << endl;
+      break;
     case Operation::cmp_eq :
         if(!isLastInstruction())
         {
@@ -185,6 +195,7 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
 
   auto lastBB = new BasicBlock(this, new_BB_name());
   add_bb(lastBB);
+  out_bb = lastBB;
 
   firstBB->exit_false = nullptr;
   firstBB->exit_true = lastBB;
@@ -196,16 +207,14 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
 
   SymbolType["!bp"] = new BuiltinType(BuiltinType::Kind::VOID);
   SymbolIndex["!bp"] = 0;
-
-  SymbolType["putchar"] = new BuiltinType(BuiltinType::Kind::VOID);
-  SymbolIndex["putchar"] = 0;
 }
 
 std::string CFG::new_BB_name() {
-  return "bb" + std::to_string(nextBBnumber++);
+  return ast->getName() + "_bb" + std::to_string(nextBBnumber++);
 }
 
 int CFG::get_var_index(string name) {
+  cout << name << endl;
   return SymbolIndex.at(name);
 }
 
