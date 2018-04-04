@@ -86,6 +86,13 @@ public:
     prettyPrint("CharLiteral '" + std::to_string(charLit->getValue()) + "'");
   }
 
+  virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) {
+    prettyPrint("ReturnStmt");
+    pushLevel();
+    visitExpr(returnStmt->getExpr());
+    popLevel();
+  }
+
   virtual ErrorType visitIfStmt(const IfStmt *ifStmt) {
     prettyPrint("IfStmt");
     pushLevel();

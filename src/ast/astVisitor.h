@@ -119,6 +119,9 @@ public:
     if (const BlockStmt *bStmt = dynamic_cast<const BlockStmt *>(stmt)) {
       visitBlockStmt(bStmt);
     }
+    if (const ReturnStmt *rStmt = dynamic_cast<const ReturnStmt *>(stmt)) {
+      visitReturnStmt(rStmt);
+    }
   }
 
   virtual ErrorType visitDeclStmt(const DeclStmt *dStmt) {
@@ -127,6 +130,14 @@ public:
 
   virtual ErrorType visitExprStmt(const ExprStmt *eStmt) {
     visitExpr(eStmt->getExpr());
+  }
+
+  virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) {
+    if (!returnStmt->getExpr()) {
+      return true;
+    }
+
+    visitExpr(returnStmt->getExpr());
   }
 
   virtual ErrorType visitIfStmt(const IfStmt *ifStmt) {
@@ -148,7 +159,7 @@ public:
   }
 
   virtual ErrorType visitParam(const Param *param) {
-    visitExpr(param->getExpr());
+    return visitExpr(param->getExpr());
   }
 
   virtual const Type* getExpressionType(const Expr *expr) {
@@ -188,10 +199,6 @@ public:
     if (const UnaryOp *uop = dynamic_cast<const UnaryOp *>(expr)) {
       const Expr* expression = uop->getExpr();
       return getExpressionType(expression);
-    }
-
-    if (const UnaryOp *unop = dynamic_cast<const UnaryOp *>(expr)) {
-      return new BuiltinType(BuiltinType::Kind::INT64_T);
     }
   }
 

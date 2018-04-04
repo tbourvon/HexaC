@@ -54,6 +54,7 @@ void IRInstr::gen_asm(ostream& out) {
             out << "subq " << indexParam2 << "(%rbp), %rax" << endl;
             out << "movq %rax, " << indexDest << "(%rbp)" << endl;
             break;
+
         case Operation::mul :
             indexDest = bb->cfg->get_var_index(params[0]);
             indexParam1 = bb->cfg->get_var_index(params[1]);
@@ -72,10 +73,10 @@ void IRInstr::gen_asm(ostream& out) {
             out << "movq " << indexParam1 << "(%rbp), %r10" << endl;
             out << "movq %r10, (%rax)" << endl;
             break;
+
         case Operation::call : {
             std::string funcToCall = params[1];
-            if(funcToCall == "putchar")
-            {
+            if(funcToCall == "putchar") {
 #ifdef __APPLE__
                 funcToCall = "_putchar";
 #endif
@@ -83,12 +84,25 @@ void IRInstr::gen_asm(ostream& out) {
 
             indexDest = bb->cfg->get_var_index(params[0]);
             indexParam1 = bb->cfg->get_var_index(params[1]);
-            indexParam2 = bb->cfg->get_var_index(params[2]);
-            out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
+            //indexParam2 = bb->cfg->get_var_index(params[2]);
+            //out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
+
+            for (int i = 2; i < params.size(); i++) {
+                switch(i-2) {
+                    case 0: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rdi" << endl; break;
+                    case 1: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rsi" << endl; break;
+                    case 2: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rdx" << endl; break;
+                    case 3: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rcx" << endl; break;
+                    case 4: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %r8" << endl; break;
+                    case 5: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %rç" << endl; break;
+                }
+            }
+
             out << "movb $0, %al" << endl;
             out << "callq " << funcToCall << endl;
             break;
         }
+
         case Operation::cmp_eq :
             if(!isLastInstruction())
             {
@@ -106,15 +120,32 @@ void IRInstr::gen_asm(ostream& out) {
                 out << "cmpq " << indexParam1 << "(%rbp), %rax" << endl;
                 out << "jne " << bb->exit_false->label << endl;
             }
+            break;
 
-            break;
+                case Operation::cmp_le :
+                    break;
+                case Operation::not_op:
+                    indexDest = bb->cfg->get_var_index(params[0]);
+                out << "and " << indexDest << "(%rbp), $1, $" << params[0];
+                break;
+
         case Operation::cmp_lt :
-            break;
-        case Operation::cmp_le :
-            break;
-        case Operation::not_op:
-            indexDest = bb->cfg->get_var_index(params[0]);
-            out << "and " << indexDest << "(%rbp), $1, $" << params[0];
+            if(!isLastInstruction())
+            {
+                indexDest = bb->cfg->get_var_index(params[0]);
+                indexParam1 = bb->cfg->get_var_index(params[1]);
+                indexParam2 = bb->cfg->get_var_index(params[2]);
+
+            }
+            else
+            {
+                indexDest = bb->cfg->get_var_index(params[0]);
+                indexParam1 = bb->cfg->get_var_index(params[1]);
+                indexParam2 = bb->cfg->get_var_index(params[2]);
+                out << "movq " << indexParam2 << "(%rbp), %rax" << endl;
+                out << "cmpq " << "%rax, " << indexParam1 << "(%rbp)" << endl;
+                out << "jge " << bb->exit_false->label << endl;
+            }
             break;
     }
 }

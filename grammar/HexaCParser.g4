@@ -58,6 +58,7 @@ stmt
   | if_stmt
   | while_stmt
   | block
+  | return_stmt
   ;
 
 var_decl
@@ -121,4 +122,8 @@ if_stmt
 
 while_stmt
   : WHILE OPEN_PAR expr CLOSE_PAR stmt
+  ;
+
+return_stmt
+  : RETURN (expr)? SEMICOLON
   ;
