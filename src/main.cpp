@@ -43,22 +43,18 @@ int main(int argc, const char* argv[]) {
   std::stringstream assembly;
 
   assembly << ".text" << std::endl;
-  assembly << ".global main" << std::endl;
+  assembly << ".global _main" << std::endl;
   assembly << std::endl;
 
   for (auto cfg : cfgs) {
     cfg->gen_asm(assembly);
   }
 
-  std::cout << assembly.str();
-
-
-  /*std::string assemblyCode = ir.gen_asm();
-  std::cout << assemblyCode << std::endl;
+  std::cout << assembly.str() << std::endl;
 
   std::ofstream outfile;
   outfile.open(outputFileName+".s");
-  outfile << assemblyCode;
+  outfile << assembly.str();
   outfile.close();
 
 #ifdef GENEXEC
@@ -71,7 +67,7 @@ int main(int argc, const char* argv[]) {
     system(gccCommand.c_str());
 
 #endif
-  */
+
 
 
   return 0;

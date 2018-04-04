@@ -36,6 +36,10 @@ public:
     m_currentCFG->add_to_symbol_table(vd->getName(), vd->getType());
   }
 
+  virtual ErrorType visitExprStmt(const ExprStmt* exprStmt) override {
+    visitExprIR(exprStmt->getExpr());
+  }
+
   virtual std::string visitExprIR(const Expr *expr) {
     if (const BinaryOp *bo = dynamic_cast<const BinaryOp *>(expr)) {
       return visitBinaryOpIR(bo);
@@ -138,18 +142,29 @@ public:
   virtual ErrorType visitIfStmt(const IfStmt *ifStmt) {
     visitExprIR(ifStmt->getCond());
 
+    auto condBB = m_currentCFG->current_bb;
+
     auto thenBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(thenBB);
+    m_currentCFG->current_bb = thenBB;
+    visitStmt(ifStmt->getStmt());
+
     auto elseBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(elseBB);
+    m_currentCFG->current_bb = elseBB;
+    if (ifStmt->getElseStmt()) {
+      visitStmt(ifStmt->getElseStmt());
+    }
+
     auto afterIfBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(afterIfBB);
+    m_currentCFG->current_bb = afterIfBB;
 
-    afterIfBB->exit_true = m_currentCFG->current_bb->exit_true;
-    afterIfBB->exit_false = m_currentCFG->current_bb->exit_false;
+    afterIfBB->exit_true = condBB->exit_true;
+    afterIfBB->exit_false = condBB->exit_false;
 
-    m_currentCFG->current_bb->exit_true = thenBB;
-    m_currentCFG->current_bb->exit_false = elseBB;
+    condBB->exit_true = thenBB;
+    condBB->exit_false = elseBB;
 
     thenBB->exit_true = afterIfBB;
     thenBB->exit_false = nullptr;
@@ -157,7 +172,6 @@ public:
     elseBB->exit_true = afterIfBB;
     elseBB->exit_false = nullptr;
 
-    m_currentCFG->current_bb = afterIfBB;
   }
 
   virtual ErrorType visitWhileStmt(const WhileStmt *whileStmt) {

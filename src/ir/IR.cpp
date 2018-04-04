@@ -9,21 +9,40 @@ bool IRInstr::isLastInstruction()
   return this == bb->instrs.back();
 }
 
+string IRInstr::suffix_for_size(int size) {
+  switch (size) {
+    case 1: return "b";
+    case 4: return "l";
+    case 8: return "q";
+    default: return to_string(size);
+  }
+}
+
+const Type* CFG::get_var_type(string name) {
+  return SymbolType.at(name);
+}
+
 void IRInstr::gen_asm(ostream& out) {
     int indexDest;
     int indexParam1;
     int indexParam2;
+    string s = suffix_for_size(bb->cfg->get_size_for_type(t));
 
     switch(op) {
       case Operation::ldconst :
           indexDest = bb->cfg->get_var_index(params[0]);
-          out << "movq $" << params[1] << "," << indexDest <<"(%rbp)" << endl;
+          out << "mov" << s << " $" << params[1] << "," << indexDest <<"(%rbp)" << endl;
           break;
       case Operation::add :
       indexDest = bb->cfg->get_var_index(params[0]);
           indexParam1 = bb->cfg->get_var_index(params[1]);
           indexParam2 = bb->cfg->get_var_index(params[2]);
-          out << "movq " << indexParam1 << "(%rbp), %rax" << endl;
+
+          if (params[1] == "!bp") {
+            out << "movq %rbp, %rax" << endl;
+          } else {
+            out << "movq " << indexParam1 << "(%rbp), %rax" << endl;
+          }
           out << "addq " << indexParam2 << "(%rbp), %rax" << endl;
           out << "movq %rax, " << indexDest << "(%rbp)" << endl;
           break;
@@ -39,16 +58,27 @@ void IRInstr::gen_asm(ostream& out) {
       indexDest = bb->cfg->get_var_index(params[0]);
           indexParam1 = bb->cfg->get_var_index(params[1]);
           indexParam2 = bb->cfg->get_var_index(params[2]);
-          out << "movq " << indexParam1 << "(%rbp)";
-          out << "multq " << indexParam2 << "(%rbp), %rax" << endl;
+          out << "movq " << indexParam1 << "(%rbp), %rax" << endl;
+          out << "imulq " << indexParam2 << "(%rbp), %rax" << endl;
           out << "movq %rax, " << indexDest << "(%rbp)" << endl;
           break;
     case Operation::rmem :
 
       break;
     case Operation::wmem :
+      indexDest = bb->cfg->get_var_index(params[0]);
+          indexParam1 = bb->cfg->get_var_index(params[1]);
+          out << "movq " << indexDest << "(%rbp), %rax" << endl;
+          out << "movq " << indexParam1 << "(%rbp), %r10" << endl;
+          out << "movq %r10, (%rax)" << endl;
       break;
     case Operation::call :
+      indexDest = bb->cfg->get_var_index(params[0]);
+      indexParam1 = bb->cfg->get_var_index(params[1]);
+      indexParam2 = bb->cfg->get_var_index(params[2]);
+      out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
+      out << "movb $0, %al" << endl;
+      out << "callq " << params[1] << endl;
       break;
     case Operation::cmp_eq :
         if(!isLastInstruction())
@@ -60,7 +90,12 @@ void IRInstr::gen_asm(ostream& out) {
         }
         else
         {
-
+            indexDest = bb->cfg->get_var_index(params[0]);
+            indexParam1 = bb->cfg->get_var_index(params[1]);
+            indexParam2 = bb->cfg->get_var_index(params[2]);
+            out << "movq " << indexParam2 << "(%rbp), %rax" << endl;
+            out << "cmpq " << indexParam1 << "(%rbp), %rax" << endl;
+            out << "jne " << bb->exit_false->label << endl;
         }
 
       break;
@@ -82,7 +117,9 @@ void BasicBlock::gen_asm(ostream& out) {
     instr->gen_asm(out);
   }
 
-  if (!exit_true && !exit_false) {
+  if (exit_true) {
+    out << "jmp " << exit_true->label << endl;
+  } else if (!exit_false) {
     cfg->gen_asm_epilogue(out);
   }
   // TODO: truc bizarre des deux jumps conditionnels
@@ -113,6 +150,9 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
 
   SymbolType["!bp"] = new BuiltinType(BuiltinType::Kind::VOID);
   SymbolIndex["!bp"] = 0;
+
+  SymbolType["_putchar"] = new BuiltinType(BuiltinType::Kind::VOID);
+  SymbolIndex["_putchar"] = 0;
 }
 
 std::string CFG::new_BB_name() {
@@ -128,20 +168,28 @@ void CFG::add_bb(BasicBlock *bb) {
 } 
 
 std::string CFG::create_new_tempvar(const Type* t) {
-  std::string name = "!tmp" + std::to_string(nextFreeSymbolIndex);
+  nextFreeSymbolIndex -= get_size_for_type(t);
+
+  std::string name = "!tmp" + std::to_string(-nextFreeSymbolIndex);
+  if (get_size_for_type(t) == 0) {
+    int i = 1;
+    while (SymbolType.count(name + "_" + to_string(i))) {
+      i++;
+    }
+    name = name + "_" + to_string(i);
+  }
+
   SymbolType[name] = t;
   SymbolIndex[name] = nextFreeSymbolIndex;
-
-  nextFreeSymbolIndex -= get_size_for_type(t);
 
   return name;
 }
 
 void CFG::add_to_symbol_table(string name, const Type* t) {
+  nextFreeSymbolIndex -= get_size_for_type(t);
+
   SymbolType[name] = t;
   SymbolIndex[name] = nextFreeSymbolIndex;
-
-  nextFreeSymbolIndex -= get_size_for_type(t);
 }
 
 void CFG::gen_asm(ostream& out) {
@@ -151,12 +199,14 @@ void CFG::gen_asm(ostream& out) {
 }
 
 void CFG::gen_asm_prologue(ostream& out) {
-  unsigned int size = 0;
+  int size = 0;
   for (const auto& symbol_pair : SymbolType) {
     size += get_size_for_type(symbol_pair.second);
   }
 
-  out << ".pushq  %rbp" << endl;
+  size += 16 - (size % 16); // align to 16 bytes.
+
+  out << "pushq  %rbp" << endl;
   out << "movq  %rsp, %rbp" << endl;
   out << "subq  $" << size << ", %rsp" << endl;
   out << endl;
@@ -175,9 +225,9 @@ int CFG::get_size_for_type(const Type* t) {
   }
 
   switch (builtin->getKind()) {
-    case BuiltinType::Kind::CHAR: return 1;
+    case BuiltinType::Kind::CHAR: return 4;
     case BuiltinType::Kind::INT32_T: return 4;
     case BuiltinType::Kind::INT64_T: return 8;
-    default: return 0;
+    case BuiltinType::Kind::VOID: return 0;
   }
 }

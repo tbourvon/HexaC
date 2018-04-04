@@ -75,7 +75,7 @@ public:
   }
 
   virtual ErrorType visitDeclRefExpr(const DeclRefExpr *ref) {
-    prettyPrint("DeclRefExpr '" + ref->getDecl()->getName() + "'");
+    prettyPrint("DeclRefExpr '" + ref->getDecl()->getName() + "' " + (ref->getKind() == DeclRefExpr::Kind::LVALUE ? "lvalue" : "rvalue"));
   }
 
   virtual ErrorType visitIntegerLiteral(const IntegerLiteral *intLit) {

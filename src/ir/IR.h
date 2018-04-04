@@ -37,12 +37,13 @@ class IRInstr {
 
 	/**  constructor */
 	IRInstr(BasicBlock* bb_, Operation op_, const Type* t_, vector<string> params_);
-	
+
 	/** Actual code generation */
 	void gen_asm(ostream &o); /**< x86 assembly code generation for this IR instruction */
 
  private:
     bool isLastInstruction();
+		string suffix_for_size(int size);
 	BasicBlock* bb; /**< The BB this instruction belongs to, which provides a pointer to the CFG this instruction belong to */
 	Operation op;
 	const Type* t;
@@ -117,7 +118,7 @@ class CFG {
 	void add_to_symbol_table(string name, const Type* t);
 	string create_new_tempvar(const Type* t);
 	int get_var_index(string name);
-	Type get_var_type(string name);
+	const Type* get_var_type(string name);
 
 	int get_size_for_type(const Type* t);
 

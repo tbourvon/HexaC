@@ -160,7 +160,7 @@ public:
       return getExpressionType(ge->getSubExpr());
     }
 
-    if (const LiteralExpr *le = dynamic_cast<const LiteralExpr *>(expr)) {
+    if (const CharLiteral *le = dynamic_cast<const CharLiteral *>(expr)) {
       return new BuiltinType(BuiltinType::Kind::CHAR);
     }
 
@@ -170,14 +170,18 @@ public:
 
     if (const DeclRefExpr *dre = dynamic_cast<const DeclRefExpr *>(expr)) {
       const Decl *d = dre->getDecl();
-      if (const VarDecl *vd = dynamic_cast<const VarDecl *>(dre)) {
+      if (const VarDecl *vd = dynamic_cast<const VarDecl *>(d)) {
         const Type *type = vd->getType();
         return type;
       }
-      if (const FuncDecl *fd = dynamic_cast<const FuncDecl *>(dre)) {
+      if (const FuncDecl *fd = dynamic_cast<const FuncDecl *>(d)) {
         const Type *type = fd->getType();
         return type;
       }
+    }
+
+    if (const BinaryOp *binop = dynamic_cast<const BinaryOp *>(expr)) {
+      return new BuiltinType(BuiltinType::Kind::INT64_T);
     }
   }
 

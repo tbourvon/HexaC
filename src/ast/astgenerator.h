@@ -13,7 +13,7 @@ class ASTGenerator : public HexaCParserBaseVisitor
 public:
     ASTGenerator() : m_topScopeNumber(0), m_currentScope(0), m_nextDeclRefIsLvalue(false) {
         m_scopeDeclarationTable[0] = {
-            {"putchar", new FuncDecl("putchar", new BuiltinType(BuiltinType::Kind::VOID), {}, new BlockStmt({}))}
+            {"_putchar", new FuncDecl("_putchar", new BuiltinType(BuiltinType::Kind::VOID), {}, new BlockStmt({}))}
         };
     }
 
@@ -37,11 +37,6 @@ public:
 
     virtual antlrcpp::Any visitExpr(HexaCParser::ExprContext *ctx) override {
         if (ctx->bin_op) {
-            m_nextDeclRefIsLvalue = true;
-            Expr* lhs = visit(ctx->bin_lhs);
-            m_nextDeclRefIsLvalue = false;
-            Expr* rhs = visit(ctx->bin_rhs);
-
             BinaryOp::Kind kind;
             switch (ctx->bin_op->getType()) {
             case HexaCLexer::STAR:     kind = BinaryOp::Kind::MULT;        break;
@@ -64,6 +59,13 @@ public:
             case HexaCLexer::GE:       kind = BinaryOp::Kind::GE;          break;
             case HexaCLexer::LE:       kind = BinaryOp::Kind::LE;          break;
             }
+
+            if (kind == BinaryOp::Kind::ASSIGN) {
+                m_nextDeclRefIsLvalue = true;
+            }
+            Expr* lhs = visit(ctx->bin_lhs);
+            m_nextDeclRefIsLvalue = false;
+            Expr* rhs = visit(ctx->bin_rhs);
 
             return (Expr*)(new BinaryOp(kind, lhs, rhs));
         } else if (ctx->un_op) {
