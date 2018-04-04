@@ -109,6 +109,24 @@ void IRInstr::gen_asm(ostream& out) {
 
       break;
     case Operation::cmp_lt :
+        if(!isLastInstruction())
+        {
+            indexDest = bb->cfg->get_var_index(params[0]);
+            indexParam1 = bb->cfg->get_var_index(params[1]);
+            indexParam2 = bb->cfg->get_var_index(params[2]);
+
+        }
+        else
+        {
+            indexDest = bb->cfg->get_var_index(params[0]);
+            indexParam1 = bb->cfg->get_var_index(params[1]);
+            indexParam2 = bb->cfg->get_var_index(params[2]);
+            out << "movq " << indexParam2 << "(%rbp), %rax" << endl;
+            out << "cmpq " << "%rax, " << indexParam1 << "(%rbp)" << endl;
+            out << "jge " << bb->exit_false->label << endl;
+        }
+
+
       break;
     case Operation::cmp_le :
       break;
