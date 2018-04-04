@@ -6,6 +6,7 @@
 #include "HexaCParserBaseListener.h"
 #include "ast/astgenerator.h"
 #include "ast/astprinter.h"
+#include "ast/typeVisitor.h"
 #include "ir/IR.h"
 #include "ir/irgenerator.h"
 
@@ -36,6 +37,9 @@ int main(int argc, const char* argv[]) {
 
   ASTPrinter printer;
   printer.visitAST(&ast);
+
+  TypeVisitor typeChecking;
+  cout << "Vérification Type : " << typeChecking.visitAST(&ast) << endl;
 
   IRGenerator irg;
   auto cfgs = irg.generateIR(&ast);
