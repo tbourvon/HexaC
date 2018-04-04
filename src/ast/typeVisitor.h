@@ -54,13 +54,26 @@ class TypeVisitor : public ASTVisitor {
       if (const FuncDecl *fd = dynamic_cast<const FuncDecl *>(d)) {
         const std::vector<Param *> params = fd->getParams();
         if (params.size() != args.size()) {
+
           std::cout << "debug function decl size" << std::endl;
+          std::cout << "nb param : " << params.size() << " nb args : " << args.size() << std::endl;
           return false;
         }
         int i = 0;
-        for (auto param : args) {
-          if (getExpressionType(param) != getExpressionType(args[i])) {
+        for (auto param : params) {
+          const Type *t_param = param->getType();
+          const Type *t_arg = getExpressionType(args[i]);
+          const BuiltinType *bit_param = dynamic_cast<const BuiltinType *>(t_param);
+          const BuiltinType *bit_arg = dynamic_cast<const BuiltinType *>(t_arg);
+
+          if(!bit_param || !bit_arg){
+            std::cout << "casting uo" << std::endl;
+            return false;
+          }
+
+          if (bit_param->getKind() != bit_arg->getKind() ) {
             std::cout << "debug function decl param" << std::endl;
+            std::cout << "param : " << param << " nb args : " << args.size() << std::endl;
             return false;
           }
           i++;
@@ -80,7 +93,12 @@ class TypeVisitor : public ASTVisitor {
       std::cout << "debug unary op" << std::endl;
       return false;
     }
-
+    if((builtin->getKind() == BuiltinType::Kind::INT32_T) ||
+           (builtin->getKind() == BuiltinType::Kind::INT64_T)){
+             std::cout << "unary op true" << std::endl;
+           } else{
+             std::cout << "unary op false" << std::endl;
+           }
     return (builtin->getKind() == BuiltinType::Kind::INT32_T) ||
            (builtin->getKind() == BuiltinType::Kind::INT64_T);
   }

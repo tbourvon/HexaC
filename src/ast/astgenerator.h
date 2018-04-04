@@ -3,6 +3,7 @@
 
 #include <HexaCParserBaseVisitor.h>
 #include <HexaCLexer.h>
+#include <vector>
 #include "ast.h"
 
 
@@ -12,8 +13,12 @@ class ASTGenerator : public HexaCParserBaseVisitor
 {
 public:
     ASTGenerator() : m_topScopeNumber(0), m_currentScope(0), m_nextDeclRefIsLvalue(false) {
+BuiltinType *bit = new BuiltinType(BuiltinType::Kind::CHAR);
+Param *p = new Param("c", bit, NULL);
+std::vector<Param*> vect;
+vect.push_back(p);
         m_scopeDeclarationTable[0] = {
-            {"putchar", new FuncDecl("putchar", new BuiltinType(BuiltinType::Kind::VOID), {}, new BlockStmt({}))}
+            {"putchar", new FuncDecl("putchar", new BuiltinType(BuiltinType::Kind::VOID), vect, new BlockStmt({}))}
         };
     }
 
