@@ -189,6 +189,10 @@ public:
       const Expr* expression = uop->getExpr();
       return getExpressionType(expression);
     }
+
+    if (const UnaryOp *unop = dynamic_cast<const UnaryOp *>(expr)) {
+      return new BuiltinType(BuiltinType::Kind::INT64_T);
+    }
   }
 
 protected:

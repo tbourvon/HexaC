@@ -13,7 +13,7 @@ class ASTGenerator : public HexaCParserBaseVisitor
 public:
     ASTGenerator() : m_topScopeNumber(0), m_currentScope(0), m_nextDeclRefIsLvalue(false) {
         m_scopeDeclarationTable[0] = {
-            {"_putchar", new FuncDecl("_putchar", new BuiltinType(BuiltinType::Kind::VOID), {}, new BlockStmt({}))}
+            {"putchar", new FuncDecl("putchar", new BuiltinType(BuiltinType::Kind::VOID), {}, new BlockStmt({}))}
         };
     }
 
@@ -69,12 +69,7 @@ public:
 
             return (Expr*)(new BinaryOp(kind, lhs, rhs));
         } else if (ctx->un_op) {
-            if (!ctx->postfix) {
-                m_nextDeclRefIsLvalue = true;
-            }
-
             Expr* expr = visit(ctx->un_expr);
-            m_nextDeclRefIsLvalue = false;
 
             UnaryOp::Kind kind;
             switch (ctx->un_op->getType()) {

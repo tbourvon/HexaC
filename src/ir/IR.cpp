@@ -72,14 +72,23 @@ void IRInstr::gen_asm(ostream& out) {
           out << "movq " << indexParam1 << "(%rbp), %r10" << endl;
           out << "movq %r10, (%rax)" << endl;
       break;
-    case Operation::call :
+    case Operation::call : {
+      std::string funcToCall = params[1];
+      if(funcToCall == "putchar")
+      {
+        #ifdef __APPLE__
+          funcToCall = "_putchar";
+        #endif
+      }
+
       indexDest = bb->cfg->get_var_index(params[0]);
       indexParam1 = bb->cfg->get_var_index(params[1]);
       indexParam2 = bb->cfg->get_var_index(params[2]);
       out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
       out << "movb $0, %al" << endl;
-      out << "callq " << params[1] << endl;
+      out << "callq " << funcToCall << endl;
       break;
+    }
     case Operation::cmp_eq :
         if(!isLastInstruction())
         {
@@ -107,7 +116,15 @@ void IRInstr::gen_asm(ostream& out) {
 }
 
 void BasicBlock::gen_asm(ostream& out) {
-  out << endl << label << ":" << endl;
+  #ifdef __APPLE__
+    if(label == "main"){
+      out << endl << "_main" << ":" << endl;
+    } else {
+      out << endl << label << ":" << endl;
+    }
+  #else
+    out << endl << label << ":" << endl;
+  #endif
 
   if (label == cfg->ast->getName()) {
     cfg->gen_asm_prologue(out);
@@ -151,8 +168,8 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
   SymbolType["!bp"] = new BuiltinType(BuiltinType::Kind::VOID);
   SymbolIndex["!bp"] = 0;
 
-  SymbolType["_putchar"] = new BuiltinType(BuiltinType::Kind::VOID);
-  SymbolIndex["_putchar"] = 0;
+  SymbolType["putchar"] = new BuiltinType(BuiltinType::Kind::VOID);
+  SymbolIndex["putchar"] = 0;
 }
 
 std::string CFG::new_BB_name() {
@@ -165,7 +182,7 @@ int CFG::get_var_index(string name) {
 
 void CFG::add_bb(BasicBlock *bb) {
   bbs.push_back(bb);
-} 
+}
 
 std::string CFG::create_new_tempvar(const Type* t) {
   nextFreeSymbolIndex -= get_size_for_type(t);
@@ -225,8 +242,8 @@ int CFG::get_size_for_type(const Type* t) {
   }
 
   switch (builtin->getKind()) {
-    case BuiltinType::Kind::CHAR: return 4;
-    case BuiltinType::Kind::INT32_T: return 4;
+    case BuiltinType::Kind::CHAR: return 8;
+    case BuiltinType::Kind::INT32_T: return 8;
     case BuiltinType::Kind::INT64_T: return 8;
     case BuiltinType::Kind::VOID: return 0;
   }

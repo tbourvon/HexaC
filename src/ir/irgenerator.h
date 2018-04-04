@@ -98,7 +98,20 @@ public:
   }
 
   virtual std::string visitUnaryOpIR(const UnaryOp *unop) {
+    std::string temp = visitExprIR(unop->getExpr());
 
+    const Type* exprType = getExpressionType(unop);
+
+    switch (unop->getKind()) {
+      case UnaryOp::Kind::PRE_INC: {
+        std::string resTmp = m_currentCFG->create_new_tempvar(exprType);
+        std::string constTmp = m_currentCFG->create_new_tempvar(exprType);
+        m_currentCFG->current_bb->add_IRInstr(IRInstr::ldconst, exprType, {constTmp, "1"});
+        m_currentCFG->current_bb->add_IRInstr(IRInstr::add, exprType, {resTmp, temp, constTmp});
+        m_currentCFG->current_bb->add_IRInstr(IRInstr::add, exprType, {temp, temp, constTmp});
+        return resTmp;
+      }
+    }
   }
 
   virtual std::string visitDeclRefExprIR(const DeclRefExpr *ref) {
