@@ -86,7 +86,6 @@ void IRInstr::gen_asm(ostream& out) {
             indexDest = bb->cfg->get_var_index(params[0]);
             indexParam1 = bb->cfg->get_var_index(params[1]);
             indexParam2 = bb->cfg->get_var_index(params[2]);
-
         }
         else
         {
@@ -225,8 +224,8 @@ int CFG::get_size_for_type(const Type* t) {
   }
 
   switch (builtin->getKind()) {
-    case BuiltinType::Kind::CHAR: return 4;
-    case BuiltinType::Kind::INT32_T: return 4;
+    case BuiltinType::Kind::CHAR: return 8;
+    case BuiltinType::Kind::INT32_T: return 8;
     case BuiltinType::Kind::INT64_T: return 8;
     case BuiltinType::Kind::VOID: return 0;
   }
