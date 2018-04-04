@@ -181,7 +181,13 @@ public:
     }
 
     if (const BinaryOp *binop = dynamic_cast<const BinaryOp *>(expr)) {
-      return new BuiltinType(BuiltinType::Kind::INT64_T);
+      const Expr* lhs = binop->getLeftHandSide();
+      return getExpressionType(lhs);
+    }
+
+    if (const UnaryOp *uop = dynamic_cast<const UnaryOp *>(expr)) {
+      const Expr* expression = uop->getExpr();
+      return getExpressionType(expression);
     }
   }
 
