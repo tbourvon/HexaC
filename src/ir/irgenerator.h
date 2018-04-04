@@ -90,6 +90,12 @@ public:
         m_currentCFG->current_bb->add_IRInstr(IRInstr::cmp_eq, exprType, {resTemp, lhsTemp, rhsTemp});
         return resTemp;
       }
+
+      case BinaryOp::Kind::LT: {
+        std::string resTemp = m_currentCFG->create_new_tempvar(exprType);
+        m_currentCFG->current_bb->add_IRInstr(IRInstr::cmp_lt, exprType, {resTemp, lhsTemp, rhsTemp});
+        return resTemp;
+      }
     }
   }
 
@@ -188,6 +194,34 @@ public:
   }
 
   virtual ErrorType visitWhileStmt(const WhileStmt *whileStmt) {
+
+    auto beforeWhileBB = m_currentCFG->current_bb;
+
+    auto condBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
+    m_currentCFG->add_bb(condBB);
+    m_currentCFG->current_bb = condBB;
+    visitExprIR(whileStmt->getCond());
+
+    auto bodyBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
+    m_currentCFG->add_bb(bodyBB);
+    m_currentCFG->current_bb = bodyBB;
+    visitStmt(whileStmt->getStmt());
+
+    auto afterWhileBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
+    m_currentCFG->add_bb(afterWhileBB);
+    m_currentCFG->current_bb = afterWhileBB;
+
+    afterWhileBB->exit_true = beforeWhileBB->exit_true;
+    afterWhileBB->exit_false = beforeWhileBB->exit_false;
+
+    beforeWhileBB->exit_true = condBB;
+    beforeWhileBB->exit_false = nullptr;
+
+    condBB->exit_true = bodyBB;
+    condBB->exit_false = afterWhileBB;
+
+    bodyBB->exit_true = condBB;
+    bodyBB->exit_false = nullptr;
   }
 
   virtual std::string visitCallExprIR(const CallExpr* ce) {
