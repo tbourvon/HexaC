@@ -10,6 +10,8 @@
 using namespace HexaC;
 
 class TypeVisitor : public ASTVisitor {
+
+  public:
   virtual ErrorType visitBinaryOp(const BinaryOp *bo) {
 
     const BuiltinType *bitl;
@@ -102,6 +104,19 @@ class TypeVisitor : public ASTVisitor {
     return (builtin->getKind() == BuiltinType::Kind::INT32_T) ||
            (builtin->getKind() == BuiltinType::Kind::INT64_T);
   }
+
+  virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) {
+    
+    const BuiltinType *bit_currentFunc = dynamic_cast<const BuiltinType *>(this->currentFunc->getType());
+    const BuiltinType *bit_returnStmt = dynamic_cast<const BuiltinType *>(getExpressionType(returnStmt->getExpr()));
+    
+    bool typeChecking =  ( bit_currentFunc->getKind() == bit_returnStmt->getKind() );
+
+    std::cout << "Return : " << typeChecking << std::endl;
+    return typeChecking;
+  }
+
+
 };
 
 #endif // TYPEVISITOR_H

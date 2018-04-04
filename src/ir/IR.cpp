@@ -202,7 +202,8 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
 }
 
 std::string CFG::new_BB_name() {
-  return "bb" + std::to_string(nextBBnumber++);
+  //return "bb" + std::to_string(nextBBnumber++);
+  return ast->getName() + "_bb" + std::to_string(nextBBnumber++);
 }
 
 int CFG::get_var_index(string name) {
