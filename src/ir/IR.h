@@ -32,7 +32,8 @@ class IRInstr {
 		cmp_eq,
 		cmp_lt,
 		cmp_le,
-		ret
+		ret,
+		not_op
 	} Operation;
 
 
