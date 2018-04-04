@@ -13,7 +13,7 @@ class ASTGenerator : public HexaCParserBaseVisitor
 public:
     ASTGenerator() : m_topScopeNumber(0), m_currentScope(0), m_nextDeclRefIsLvalue(false) {
         m_scopeDeclarationTable[0] = {
-            {"_putchar", new FuncDecl("_putchar", new BuiltinType(BuiltinType::Kind::VOID), {}, new BlockStmt({}))}
+            {"putchar", new FuncDecl("putchar", new BuiltinType(BuiltinType::Kind::VOID), {}, new BlockStmt({}))}
         };
     }
 
@@ -115,7 +115,14 @@ public:
         } else if (ctx->CHAR_LIT()) {
             return (Expr*)(new CharLiteral(ctx->CHAR_LIT()->getText()[1]));
         } else if (ctx->ID()) {
-            return (Expr*)(new DeclRefExpr(getDeclByName(ctx->ID()->getText()), m_nextDeclRefIsLvalue ? DeclRefExpr::Kind::LVALUE : DeclRefExpr::Kind::RVALUE));
+            std::string name = ctx->ID()->getText();
+            if(name == "putChar")
+            {
+              #ifdef __APPLE__
+                name = "_putChar";
+              #endif
+            }
+            return (Expr*)(new DeclRefExpr(getDeclByName(name), m_nextDeclRefIsLvalue ? DeclRefExpr::Kind::LVALUE : DeclRefExpr::Kind::RVALUE));
         }
 
         return nullptr;
@@ -209,7 +216,14 @@ public:
     }
 
     virtual antlrcpp::Any visitFunc_decl(HexaCParser::Func_declContext *ctx) override {
-        auto fd = new FuncDecl(ctx->ID()->getText(), visitType(ctx->type()), visitParam_list(ctx->param_list()), visitBlock(ctx->block()));
+      std::string name = ctx->ID()->getText();
+      if(name == "main")
+      {
+        #ifdef __APPLE__
+          name = "_main";
+        #endif
+      }
+        auto fd = new FuncDecl(name, visitType(ctx->type()), visitParam_list(ctx->param_list()), visitBlock(ctx->block()));
         m_scopeDeclarationTable.at(m_currentScope)[fd->getName()] = fd;
         return (Decl*)fd;
     }

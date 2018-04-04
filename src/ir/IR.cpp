@@ -150,8 +150,8 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
   SymbolType["!bp"] = new BuiltinType(BuiltinType::Kind::VOID);
   SymbolIndex["!bp"] = 0;
 
-  SymbolType["_putchar"] = new BuiltinType(BuiltinType::Kind::VOID);
-  SymbolIndex["_putchar"] = 0;
+  SymbolType["putchar"] = new BuiltinType(BuiltinType::Kind::VOID);
+  SymbolIndex["putchar"] = 0;
 }
 
 std::string CFG::new_BB_name() {
@@ -164,7 +164,7 @@ int CFG::get_var_index(string name) {
 
 void CFG::add_bb(BasicBlock *bb) {
   bbs.push_back(bb);
-} 
+}
 
 std::string CFG::create_new_tempvar(const Type* t) {
   nextFreeSymbolIndex -= get_size_for_type(t);
