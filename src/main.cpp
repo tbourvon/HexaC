@@ -43,7 +43,11 @@ int main(int argc, const char* argv[]) {
   std::stringstream assembly;
 
   assembly << ".text" << std::endl;
-  assembly << ".global _main" << std::endl;
+  std::string lineToWrite = ".global main";
+  #ifdef __APPLE__
+    lineToWrite = ".globl _main";
+  #endif
+  assembly << lineToWrite << std::endl;
   assembly << std::endl;
 
   for (auto cfg : cfgs) {
@@ -72,5 +76,3 @@ int main(int argc, const char* argv[]) {
 
   return 0;
 }
-
-
