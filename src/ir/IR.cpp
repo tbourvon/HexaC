@@ -74,8 +74,7 @@ void IRInstr::gen_asm(ostream& out) {
       break;
     case Operation::call : {
       std::string funcToCall = params[1];
-      if(funcToCall == "putchar")
-      {
+      if(funcToCall == "putchar") {
         #ifdef __APPLE__
           funcToCall = "_putchar";
         #endif
@@ -83,8 +82,20 @@ void IRInstr::gen_asm(ostream& out) {
 
       indexDest = bb->cfg->get_var_index(params[0]);
       indexParam1 = bb->cfg->get_var_index(params[1]);
-      indexParam2 = bb->cfg->get_var_index(params[2]);
-      out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
+      //indexParam2 = bb->cfg->get_var_index(params[2]);
+      //out << "movl " << indexParam2 << "(%rbp), %edi" << endl;
+
+      for (int i = 2; i < params.size(); i++) {
+          switch(i-2) {
+              case 0: out << "movl %rdi" << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
+              case 1: out << "movl %rsi" << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
+              case 2: out << "movl %rdx" << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
+              case 3: out << "movl %rcx" << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
+              case 4: out << "movl %r8"  << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
+              case 5: out << "movl %r9"  << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
+          }
+      }
+
       out << "movb $0, %al" << endl;
       out << "callq " << funcToCall << endl;
       break;
