@@ -122,6 +122,16 @@ protected:
   Expr *m_expr;
 };
 
+class ReturnStmt : public Stmt {
+public:
+    ReturnStmt(Expr* expr) : m_expr(expr) {}
+
+    const Expr *getExpr() const { return m_expr; }
+
+protected:
+    Expr *m_expr;
+};
+
 class IfStmt : public Stmt {
 public:
     IfStmt(Expr* cond, Stmt* stmt, Stmt* elseStmt) : m_cond(cond), m_stmt(stmt), m_elseStmt(elseStmt) {}

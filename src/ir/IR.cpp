@@ -87,12 +87,12 @@ void IRInstr::gen_asm(ostream& out) {
 
       for (int i = 2; i < params.size(); i++) {
           switch(i-2) {
-              case 0: out << "movl %rdi" << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
-              case 1: out << "movl %rsi" << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
-              case 2: out << "movl %rdx" << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
-              case 3: out << "movl %rcx" << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
-              case 4: out << "movl %r8"  << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
-              case 5: out << "movl %r9"  << bb->cfg->get_var_index(params[i]) << "(%rbp), %edi" << endl; break;
+              case 0: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rdi" << endl; break;
+              case 1: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rsi" << endl; break;
+              case 2: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rdx" << endl; break;
+              case 3: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rcx" << endl; break;
+              case 4: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %r8" << endl; break;
+              case 5: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %rç" << endl; break;
           }
       }
 

@@ -131,11 +131,23 @@ public:
         }
         else if(HexaCParser::Var_declContext *var_ctx = ctx->var_decl()){
             return (Stmt*)(new DeclStmt((Decl*)visitVar_decl(var_ctx)));
+        }
+        else if(HexaCParser::Return_stmtContext *return_ctx = ctx->return_stmt()){
+            return (Stmt*)visit(ctx->return_stmt()).as<ReturnStmt*>();
         } else {
             return (Stmt*)nullptr;
         }
 
     }
+
+    virtual antlrcpp::Any visitReturn_stmt(HexaCParser::Return_stmtContext *ctx) override {
+        Expr* expr = nullptr;
+        if (ctx->expr()) {
+            expr = visit(ctx->expr());
+        }
+
+        return new ReturnStmt(expr);
+    };
 
     virtual antlrcpp::Any visitIf_stmt(HexaCParser::If_stmtContext *ctx) override {
         Expr* cond = visit(ctx->expr());
