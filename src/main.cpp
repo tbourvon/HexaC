@@ -39,7 +39,8 @@ int main(int argc, const char* argv[]) {
   printer.visitAST(&ast);
 
   TypeVisitor typeChecking;
-  cout << "Vérification Type : " << typeChecking.visitAST(&ast) << endl;
+  cout << "Vérification Type : " << endl;
+  typeChecking.visitAST(&ast);
 
   IRGenerator irg;
   auto cfgs = irg.generateIR(&ast);
