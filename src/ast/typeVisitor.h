@@ -10,6 +10,8 @@
 using namespace HexaC;
 
 class TypeVisitor : public ASTVisitor {
+
+  public:
   virtual ErrorType visitBinaryOp(const BinaryOp *bo) {
 
     const BuiltinType *bitl;
@@ -35,9 +37,10 @@ class TypeVisitor : public ASTVisitor {
         || ((intls == 0) && (intrs == 1)) 
         || ((intls == 1) && (intrs == 0)) )) {
 
-      std::cout << "debug binary op" << std::endl;
-      std::cout << "lhs : " << (int)bitl->getKind()
-                << " / rhs : " << (int)bitr->getKind() << std::endl;
+      //std::cout << "debug binary op" << std::endl;
+      //std::cout << "lhs : " << (int)bitl->getKind()
+      //          << " / rhs : " << (int)bitr->getKind() << std::endl;
+      std::cout  <<  "line " << bo->getLine() << " : incompatible type - expected (on the right hand side) " << bitl->getKindName() << ", found " << bitr->getKindName() << std::endl;
       return false;
     }
 
@@ -54,9 +57,13 @@ class TypeVisitor : public ASTVisitor {
       if (const FuncDecl *fd = dynamic_cast<const FuncDecl *>(d)) {
         const std::vector<Param *> params = fd->getParams();
         if (params.size() != args.size()) {
-
-          std::cout << "debug function decl size" << std::endl;
-          std::cout << "nb param : " << params.size() << " nb args : " << args.size() << std::endl;
+          if(params.size() > args.size()){
+                std::cout << "line " << ce->getLine() << " : not enough parameters - expected " << params.size() << " parameters, found " << args.size() << " parameters" << std::endl; 
+          } else {
+            std::cout << "line " << ce->getLine() << " : too many parameters - expected " << params.size() << " parameters, found " << args.size() << " parameters" << std::endl; 
+          }
+          //std::cout << "debug function decl size" << std::endl;
+          //std::cout << "nb param : " << params.size() << " nb args : " << args.size() << std::endl;
           return false;
         }
         int i = 0;
@@ -67,13 +74,15 @@ class TypeVisitor : public ASTVisitor {
           const BuiltinType *bit_arg = dynamic_cast<const BuiltinType *>(t_arg);
 
           if(!bit_param || !bit_arg){
-            std::cout << "casting uo" << std::endl;
+            //std::cout << "casting uo" << std::endl;
+            std::cout << "line " << ce->getLine() << " : invalid parameter" << std::endl;
             return false;
           }
 
           if (bit_param->getKind() != bit_arg->getKind() ) {
-            std::cout << "debug function decl param" << std::endl;
-            std::cout << "param : " << param << " nb args : " << args.size() << std::endl;
+            //std::cout << "debug function decl param" << std::endl;
+            //std::cout << "param : " << param << " nb args : " << args.size() << std::endl;
+             std::cout << "line " << ce->getLine() << " : incompatible type - expected " << bit_param->getKindName() << ", found " << bit_arg->getKindName() << std::endl;
             return false;
           }
           i++;
@@ -81,27 +90,41 @@ class TypeVisitor : public ASTVisitor {
         return true;
       }
     }
-    std::cout << "debug call expr" << std::endl;
+    //std::cout << "debug call expr" << std::endl;
     return false;
   }
 
   virtual ErrorType visitUnaryOp(const UnaryOp *uo) {
     auto builtin =
         dynamic_cast<const BuiltinType *>(getExpressionType(uo->getExpr()));
-        std::cout << (int) builtin->getKind() << std::endl;
     if (!builtin) {
       std::cout << "debug unary op" << std::endl;
       return false;
     }
     if((builtin->getKind() == BuiltinType::Kind::INT32_T) ||
            (builtin->getKind() == BuiltinType::Kind::INT64_T)){
-             std::cout << "unary op true" << std::endl;
+             return true;
            } else{
-             std::cout << "unary op false" << std::endl;
+             std::cout << "line " << uo->getLine() << " : incompatible type - expected int32 or int 64, found " << builtin->getKindName() << std::endl;
+             return false;
            }
-    return (builtin->getKind() == BuiltinType::Kind::INT32_T) ||
-           (builtin->getKind() == BuiltinType::Kind::INT64_T);
   }
+
+  virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) {
+    
+    const BuiltinType *bit_currentFunc = dynamic_cast<const BuiltinType *>(this->currentFunc->getType());
+    const BuiltinType *bit_returnStmt = dynamic_cast<const BuiltinType *>(getExpressionType(returnStmt->getExpr()));
+    
+    bool typeChecking =  ( bit_currentFunc->getKind() == bit_returnStmt->getKind() );
+
+    if(!typeChecking){
+        std::cout << "line " << returnStmt->getLine() << " : invalid return type in function " << currentFunc->getName() << " - expected " << bit_currentFunc->getKindName() << ", found " << bit_returnStmt->getKindName() << std::endl;
+    }
+
+    return typeChecking;
+  }
+
+
 };
 
 #endif // TYPEVISITOR_H

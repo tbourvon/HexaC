@@ -32,6 +32,7 @@ public:
   }
 
   virtual ErrorType visitFuncDecl(const FuncDecl *fd) {
+    this->currentFunc = fd;
     for (auto param : fd->getParams()) {
       visitParam(param);
     }
@@ -204,6 +205,7 @@ public:
 
 protected:
   Program *program;
+  const FuncDecl *currentFunc;
 };
 
 #endif // ASTVISITOR_H

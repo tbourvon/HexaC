@@ -70,7 +70,8 @@ expr_stmt
   ;
 
 expr returns[bool postfix]
-  : bin_lhs=expr bin_op=STAR bin_rhs=expr
+  : callee=expr OPEN_PAR arg_list CLOSE_PAR
+  | bin_lhs=expr bin_op=STAR bin_rhs=expr
   | bin_lhs=expr bin_op=DIV bin_rhs=expr
   | bin_lhs=expr bin_op=MOD bin_rhs=expr
   | bin_lhs=expr bin_op=PLUS bin_rhs=expr
@@ -99,8 +100,6 @@ expr returns[bool postfix]
   | un_op=NOT un_expr=expr { $postfix = false; }
   | un_expr=expr un_op=PLUS_PLUS { $postfix = true; }
   | un_expr=expr un_op=MINUS_MINUS { $postfix = true; }
-
-  | callee=expr OPEN_PAR arg_list CLOSE_PAR
 
   | literal
   ;
