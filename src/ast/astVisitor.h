@@ -12,125 +12,133 @@ public:
 
   ASTVisitor();
   virtual ErrorType visitAST(const AST *ast) {
-    visitProgram(ast->getProgram());
+    return visitProgram(ast->getProgram());
   }
 
   virtual ErrorType visitProgram(const Program *program) {
     std::vector<Decl *> decls = program->getDecls();
+    bool to_return = true;
     for (int i = 0; i < decls.size(); i++) {
-      visitDecl(decls[i]);
+      to_return = to_return && visitDecl(decls[i]);
     }
+    return to_return;
   }
 
   virtual ErrorType visitDecl(const Decl *decl) {
     if (const FuncDecl *fd = dynamic_cast<const FuncDecl *>(decl)) {
-      visitFuncDecl(fd);
+      return visitFuncDecl(fd);
     }
     if (const VarDecl *vd = dynamic_cast<const VarDecl *>(decl)) {
-      visitVarDecl(vd);
+      return visitVarDecl(vd);
     }
+    return false;
   }
 
   virtual ErrorType visitFuncDecl(const FuncDecl *fd) {
     this->currentFunc = fd;
+    bool to_return = true;
     for (auto param : fd->getParams()) {
-      visitParam(param);
+      to_return = to_return && visitParam(param);
     }
-    visitBlockStmt(fd->getBlock());
+    return to_return && visitBlockStmt(fd->getBlock());
   }
 
   virtual ErrorType visitVarDecl(const VarDecl *vd) {
-    visitExpr(vd->getExpr());
+    return visitExpr(vd->getExpr());
   }
 
   virtual ErrorType visitExpr(const Expr *expr) {
     if (const BinaryOp *bo = dynamic_cast<const BinaryOp *>(expr)) {
-      visitBinaryOp(bo);
+      return visitBinaryOp(bo);
     }
     if (const UnaryOp *uo = dynamic_cast<const UnaryOp *>(expr)) {
-      visitUnaryOp(uo);
+      return visitUnaryOp(uo);
     }
     if (const CallExpr *ce = dynamic_cast<const CallExpr *>(expr)) {
-      visitCallExpr(ce);
+      return visitCallExpr(ce);
     }
     if (const GroupExpr *ge = dynamic_cast<const GroupExpr *>(expr)) {
-      visitGroupExpr(ge);
+      return visitGroupExpr(ge);
     }
     if (const LiteralExpr *le = dynamic_cast<const LiteralExpr *>(expr)) {
-      visitLiteralExpr(le);
+      return visitLiteralExpr(le);
     }
     if (const DeclRefExpr *dre = dynamic_cast<const DeclRefExpr *>(expr)) {
-      visitDeclRefExpr(dre);
+      return visitDeclRefExpr(dre);
     }
+    return false;
   }
 
   virtual ErrorType visitLiteralExpr(const LiteralExpr *le) {
     if (const IntegerLiteral *il = dynamic_cast<const IntegerLiteral *>(le)) {
-      visitIntegerLiteral(il);
+      return visitIntegerLiteral(il);
     }
     if (const CharLiteral *cl = dynamic_cast<const CharLiteral *>(le)) {
-      visitCharLiteral(cl);
+      return visitCharLiteral(cl);
     }
+    return false;
   }
 
   virtual ErrorType visitIntegerLiteral(const IntegerLiteral *il) {
-
+    return true;
   }
 
   virtual ErrorType visitCharLiteral(const CharLiteral *cl) {
-
+    return true;
   }
 
   virtual ErrorType visitBinaryOp(const BinaryOp *bo) {
-    visitExpr(bo->getLeftHandSide());
-    visitExpr(bo->getRightHandSide());
+    return visitExpr(bo->getLeftHandSide()) && visitExpr(bo->getRightHandSide());
   }
 
   virtual ErrorType visitUnaryOp(const UnaryOp *uo) {
-    visitExpr(uo->getExpr());
+    return visitExpr(uo->getExpr());
   }
 
   virtual ErrorType visitCallExpr(const CallExpr *ce) {
-    visitExpr(ce->getCallee());
+    bool to_return = visitExpr(ce->getCallee());
     for (auto arg : ce->getArgs()) {
-      visitExpr(arg);
+      to_return = to_return && visitExpr(arg);
     }
+    return to_return;
   }
 
   virtual ErrorType visitGroupExpr(const GroupExpr *ge) {
-    visitExpr(ge->getSubExpr());
+    return visitExpr(ge->getSubExpr());
   }
 
   virtual ErrorType visitDeclRefExpr(const DeclRefExpr *dre) {
+    return true;
   }
 
   virtual ErrorType visitStmt(const Stmt *stmt) {
     if (const DeclStmt *dStmt = dynamic_cast<const DeclStmt *>(stmt)) {
-      visitDeclStmt(dStmt);
+      return visitDeclStmt(dStmt);
     }
     if (const ExprStmt *eStmt = dynamic_cast<const ExprStmt *>(stmt)) {
-      visitExprStmt(eStmt);
+      return visitExprStmt(eStmt);
     }
     if (const IfStmt *ifStmt = dynamic_cast<const IfStmt *>(stmt)) {
-      visitIfStmt(ifStmt);
+      return visitIfStmt(ifStmt);
     }
     if (const WhileStmt *wStmt = dynamic_cast<const WhileStmt *>(stmt)) {
-      visitWhileStmt(wStmt);
+      return visitWhileStmt(wStmt);
     }
     if (const BlockStmt *bStmt = dynamic_cast<const BlockStmt *>(stmt)) {
-      visitBlockStmt(bStmt);
+      return visitBlockStmt(bStmt);
     }
     if (const ReturnStmt *rStmt = dynamic_cast<const ReturnStmt *>(stmt)) {
-      visitReturnStmt(rStmt);
+      return visitReturnStmt(rStmt);
     }
+    return false;
   }
 
   virtual ErrorType visitDeclStmt(const DeclStmt *dStmt) {
-    visitDecl(dStmt->getDecl());
+    return visitDecl(dStmt->getDecl());
   }
 
   virtual ErrorType visitExprStmt(const ExprStmt *eStmt) {
-    visitExpr(eStmt->getExpr());
+    return visitExpr(eStmt->getExpr());
   }
 
   virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) {
@@ -138,25 +146,24 @@ public:
       return true;
     }
 
-    visitExpr(returnStmt->getExpr());
+    return visitExpr(returnStmt->getExpr());
   }
 
   virtual ErrorType visitIfStmt(const IfStmt *ifStmt) {
-    visitExpr(ifStmt->getCond());
-    visitStmt(ifStmt->getStmt());
-    visitStmt(ifStmt->getElseStmt());
+    return visitExpr(ifStmt->getCond()) && visitStmt(ifStmt->getStmt()) && visitStmt(ifStmt->getElseStmt());
   }
 
   virtual ErrorType visitWhileStmt(const WhileStmt *wStmt) {
-    visitExpr(wStmt->getCond());
-    visitStmt(wStmt->getStmt());
+    return visitExpr(wStmt->getCond()) && visitStmt(wStmt->getStmt());
   }
 
   virtual ErrorType visitBlockStmt(const BlockStmt *bStmt) {
     std::vector<Stmt *> stmts = bStmt->getBody();
+    bool to_return = true;
     for (int i = 0; i < stmts.size(); i++) {
-      visitStmt(stmts[i]);
+      to_return = to_return && visitStmt(stmts[i]);
     }
+    return to_return;
   }
 
   virtual ErrorType visitParam(const Param *param) {
@@ -201,6 +208,7 @@ public:
       const Expr* expression = uop->getExpr();
       return getExpressionType(expression);
     }
+    return new Type();
   }
 
 protected:

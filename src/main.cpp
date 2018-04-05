@@ -9,6 +9,8 @@
 #include "ir/IR.h"
 #include "ir/irgenerator.h"
 
+#define GENEXEC
+
 using namespace antlr4;
 
 int main(int argc, const char* argv[]) {
@@ -35,10 +37,12 @@ int main(int argc, const char* argv[]) {
   AST ast(program);
 
   ASTPrinter printer;
-  printer.visitAST(&ast);
+    cout << endl << "-----------------------------" << endl << "AST : " << endl << endl;
+
+    printer.visitAST(&ast);
 
   TypeVisitor typeChecking;
-  cout << "Vérification Type : " << endl;
+  cout << endl << "-----------------------------" << endl << "Vérification Type : " << endl << endl;
   typeChecking.visitAST(&ast);
 
   IRGenerator irg;
@@ -58,7 +62,8 @@ int main(int argc, const char* argv[]) {
     cfg->gen_asm(assembly);
   }
 
-  std::cout << assembly.str() << std::endl;
+    cout << endl << "-----------------------------" << endl << outputFileName << ".s : " << endl << endl;
+    std::cout << assembly.str() << std::endl;
 
   std::ofstream outfile;
   outfile.open(outputFileName+".s");
@@ -73,10 +78,7 @@ int main(int argc, const char* argv[]) {
     //gcc command
     std::string gccCommand = "gcc " + outputFileName +".o -o " + outputFileName;
     system(gccCommand.c_str());
-
 #endif
-
-
 
   return 0;
 }
