@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 #include <antlr4-runtime.h>
 #include "HexaCLexer.h"
 #include "HexaCParser.h"

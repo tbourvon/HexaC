@@ -126,7 +126,8 @@ void IRInstr::gen_asm(ostream& out) {
                     break;
                 case Operation::not_op:
                     indexDest = bb->cfg->get_var_index(params[0]);
-                out << "and " << indexDest << "(%rbp), $1, $" << params[0];
+                out << "movq $1, %rax";
+                out << "xor " << indexDest << "(%rbp), %rax" << params[0];
                 break;
 
         case Operation::cmp_lt :
