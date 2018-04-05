@@ -55,16 +55,24 @@ vect.push_back(p);
             case HexaCLexer::MOD_EQ:   kind = BinaryOp::Kind::ASSIGN_MOD;  break;
             case HexaCLexer::PLUS_EQ:  kind = BinaryOp::Kind::ASSIGN_ADD;  break;
             case HexaCLexer::MINUS_EQ: kind = BinaryOp::Kind::ASSIGN_SUB;  break;
+            case HexaCLexer::OR_EQ:   kind = BinaryOp::Kind::ASSIGN_OR;  break;
+            case HexaCLexer::AND_EQ:  kind = BinaryOp::Kind::ASSIGN_AND;  break;
+            case HexaCLexer::XOR_EQ: kind = BinaryOp::Kind::ASSIGN_XOR;  break;
             case HexaCLexer::EQ_EQ:    kind = BinaryOp::Kind::EQ;          break;
             case HexaCLexer::NOT_EQ:   kind = BinaryOp::Kind::NEQ;         break;
             case HexaCLexer::OR_OR:    kind = BinaryOp::Kind::OR;          break;
             case HexaCLexer::AND_AND:  kind = BinaryOp::Kind::AND;         break;
+            case HexaCLexer::OR:       kind = BinaryOp::Kind::BOR;          break;
+            case HexaCLexer::AND:      kind = BinaryOp::Kind::BAND;         break;
+            case HexaCLexer::LSH:      kind = BinaryOp::Kind::LSH;          break;
+            case HexaCLexer::RSH:      kind = BinaryOp::Kind::RSH;         break;
+            case HexaCLexer::XOR:      kind = BinaryOp::Kind::XOR;          break;
             case HexaCLexer::GT:       kind = BinaryOp::Kind::GT;          break;
             case HexaCLexer::LT:       kind = BinaryOp::Kind::LT;          break;
             case HexaCLexer::GE:       kind = BinaryOp::Kind::GE;          break;
             case HexaCLexer::LE:       kind = BinaryOp::Kind::LE;          break;
+            case HexaCLexer::COMMA:       kind = BinaryOp::Kind::COMMA;          break;
             }
-            std::cout << "ligne " << ctx->start->getLine() << std::endl;
             if (kind == BinaryOp::Kind::ASSIGN) {
                 m_nextDeclRefIsLvalue = true;
             }
@@ -78,6 +86,7 @@ vect.push_back(p);
 
             UnaryOp::Kind kind;
             switch (ctx->un_op->getType()) {
+            case HexaCLexer::TILDE:        kind = UnaryOp::Kind::BNOT;         break;
             case HexaCLexer::PLUS:        kind = UnaryOp::Kind::PLUS;         break;
             case HexaCLexer::MINUS:       kind = UnaryOp::Kind::MINUS;         break;
             case HexaCLexer::NOT:         kind = UnaryOp::Kind::NOT;        break;
@@ -120,7 +129,7 @@ vect.push_back(p);
                 std::cout << "error:" << ctx->start->getLine() << ": Unknown name '" << ctx->ID()->getText() << "'" << std::endl;
                 return nullptr;
             }
-            return (Expr*)(new DeclRefExpr(decl, m_nextDeclRefIsLvalue ? DeclRefExpr::Kind::LVALUE : DeclRefExpr::Kind::RVALUE), ctx->start->getLine());
+            return (Expr*)(new DeclRefExpr(decl, (m_nextDeclRefIsLvalue ? DeclRefExpr::Kind::LVALUE : DeclRefExpr::Kind::RVALUE), ctx->start->getLine()));
         }
 
         return nullptr;

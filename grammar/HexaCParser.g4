@@ -82,14 +82,23 @@ expr returns[bool postfix]
   | bin_lhs=expr bin_op=MOD_EQ bin_rhs=expr
   | bin_lhs=expr bin_op=PLUS_EQ bin_rhs=expr
   | bin_lhs=expr bin_op=MINUS_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=AND_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=OR_EQ bin_rhs=expr
+  | bin_lhs=expr bin_op=XOR_EQ bin_rhs=expr
   | bin_lhs=expr bin_op=AND_AND bin_rhs=expr
   | bin_lhs=expr bin_op=OR_OR bin_rhs=expr
+  | bin_lhs=expr bin_op=OR bin_rhs=expr
+  | bin_lhs=expr bin_op=AND bin_rhs=expr
+  | bin_lhs=expr bin_op=XOR bin_rhs=expr
+  | bin_lhs=expr bin_op=LSH bin_rhs=expr
+  | bin_lhs=expr bin_op=RSH bin_rhs=expr
   | bin_lhs=expr bin_op=EQ_EQ bin_rhs=expr
   | bin_lhs=expr bin_op=NOT_EQ bin_rhs=expr
   | bin_lhs=expr bin_op=GT bin_rhs=expr
   | bin_lhs=expr bin_op=LT bin_rhs=expr
   | bin_lhs=expr bin_op=GE bin_rhs=expr
   | bin_lhs=expr bin_op=LE bin_rhs=expr
+  | bin_lhs=expr bin_op=COMMA bin_rhs=expr
 
   | OPEN_PAR group_expr=expr CLOSE_PAR
 
@@ -98,6 +107,7 @@ expr returns[bool postfix]
   | un_op=PLUS_PLUS un_expr=expr { $postfix = false; }
   | un_op=MINUS_MINUS un_expr=expr { $postfix = false; }
   | un_op=NOT un_expr=expr { $postfix = false; }
+  | un_op=TILDE un_expr=expr { $postfix = false; }
   | un_expr=expr un_op=PLUS_PLUS { $postfix = true; }
   | un_expr=expr un_op=MINUS_MINUS { $postfix = true; }
 

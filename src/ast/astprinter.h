@@ -150,12 +150,16 @@ protected:
     switch (kind) {
       case BinaryOp::Kind::ADD: return "+";
       case BinaryOp::Kind::AND: return "&&";
+      case BinaryOp::Kind::BAND: return "&";
       case BinaryOp::Kind::ASSIGN: return "=";
       case BinaryOp::Kind::ASSIGN_ADD: return "+=";
       case BinaryOp::Kind::ASSIGN_DIV: return "/=";
       case BinaryOp::Kind::ASSIGN_MOD: return "%=";
       case BinaryOp::Kind::ASSIGN_MULT: return "*=";
       case BinaryOp::Kind::ASSIGN_SUB: return "-=";
+      case BinaryOp::Kind::ASSIGN_OR: return "|=";
+      case BinaryOp::Kind::ASSIGN_AND: return "&=";
+      case BinaryOp::Kind::ASSIGN_XOR: return "^=";
       case BinaryOp::Kind::DIV: return "/";
       case BinaryOp::Kind::EQ: return "==";
       case BinaryOp::Kind::GE: return ">=";
@@ -166,13 +170,19 @@ protected:
       case BinaryOp::Kind::MULT: return "*";
       case BinaryOp::Kind::NEQ: return "!=";
       case BinaryOp::Kind::OR: return "||";
+      case BinaryOp::Kind::BOR: return "|";
+      case BinaryOp::Kind::XOR: return "^";
       case BinaryOp::Kind::SUB: return "-";
+      case BinaryOp::Kind::LSH: return "<<";
+      case BinaryOp::Kind::RSH: return ">>";
+      case BinaryOp::Kind::COMMA: return ",";
     }
   }
 
   std::string unopKindToString(UnaryOp::Kind kind) {
     switch (kind) {
       case UnaryOp::Kind::MINUS: return "- (prefix)";
+      case UnaryOp::Kind::BNOT: return "~ (prefix)";
       case UnaryOp::Kind::NOT: return "! (prefix)";
       case UnaryOp::Kind::PLUS: return "+ (prefix)";
       case UnaryOp::Kind::POST_DEC: return "-- (postfix)";

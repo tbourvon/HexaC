@@ -230,14 +230,23 @@ public:
     ASSIGN_MOD,
     ASSIGN_ADD,
     ASSIGN_SUB,
+    ASSIGN_OR,
+    ASSIGN_AND,
+    ASSIGN_XOR,
     EQ,
     NEQ,
     OR,
     AND,
+    BOR,
+    BAND,
+    LSH,
+    RSH,
+    XOR,
     GT,
     LT,
     GE,
-    LE
+    LE,
+    COMMA
   };
 
    Kind getKind() const { return m_kind; }
@@ -255,7 +264,7 @@ protected:
 
 class UnaryOp : public Expr {
 public:
-  enum class Kind { PLUS, MINUS, NOT, PRE_INC, PRE_DEC, POST_INC, POST_DEC };
+  enum class Kind { PLUS, MINUS, NOT, PRE_INC, PRE_DEC, POST_INC, POST_DEC, BNOT };
 
    Kind getKind() const { return m_kind; }
   const Expr *getExpr() const { return m_expr; }
