@@ -15,7 +15,7 @@ using namespace antlr4;
 
 int main(int argc, const char* argv[]) {
 
-  if(argc != 3 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0) {
+  if(argc < 3 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0) {
     std::cout << "Usage of HexaCompiler : ./HexaC input.c outputName" << std::endl;
     return 1;
   }

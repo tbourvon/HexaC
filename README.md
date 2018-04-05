@@ -17,7 +17,7 @@
 - [x] 5.8 Compiler le retour de valeur
 - [x] 5.9 Compiler l’affectation à une lvalue quelconque
 - [ ] 5.10 Compiler des tableaux
-- [ ] 5.11 Compiler les appels de fonction ayant jusqu’à 6 arguments
+- [x] 5.11 Compiler les appels de fonction ayant jusqu’à 6 arguments
 - [ ] 5.12 Compiler les boucles for
 - [ ] 5.13 Test sur des programmes complexes
 - [ ] 5.14 Gestion correcte des types
