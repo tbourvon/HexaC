@@ -23,6 +23,11 @@ int main(int argc, const char* argv[]) {
   std::string inputFileName = argv[1];
   std::string outputFileName = argv[2];
 
+  std::string option;
+  if (argc > 3) {
+    option = argv[3];
+  }
+
   std::ifstream stream;
   stream.open(inputFileName);
   ANTLRInputStream input(stream);
@@ -36,15 +41,19 @@ int main(int argc, const char* argv[]) {
   Program *program = astVisitor.visit(tree);
   AST ast(program);
 
-  ASTPrinter printer;
-    cout << endl << "-----------------------------" << endl << "AST : " << endl << endl;
+  if (option == "-p") {
+    ASTPrinter printer;
+      cout << endl << "-----------------------------" << endl << "AST : " << endl << endl;
 
-  printer.visitAST(&ast);
+    printer.visitAST(&ast);
+  }
 
-  TypeVisitor typeChecking;
-  cout << endl << "-----------------------------" << endl << "Vérification Type : " << endl << endl;
-  if (!typeChecking.visitAST(&ast)) {
-    return -1;
+  if (option == "-a") {
+    TypeVisitor typeChecking;
+    cout << endl << "-----------------------------" << endl << "Vérification Type : " << endl << endl;
+    if (!typeChecking.visitAST(&ast)) {
+      return -1;
+    }
   }
 
   IRGenerator irg;
