@@ -43,6 +43,9 @@ public:
   }
 
   virtual ErrorType visitVarDecl(const VarDecl *vd) {
+    if (!vd->getExpr()) {
+      return true;
+    }
     return visitExpr(vd->getExpr());
   }
 
