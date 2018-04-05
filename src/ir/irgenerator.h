@@ -22,7 +22,6 @@ public:
     m_currentCFG = cfg;
     m_cfgs.push_back(cfg);
 
-
     return visitBlockStmt(fd->getBlock());
   }
 

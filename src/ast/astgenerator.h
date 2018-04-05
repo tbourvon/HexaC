@@ -26,7 +26,9 @@ vect.push_back(p);
       std::vector<Decl*> decls;
       for (HexaCParser::Toplevel_itemContext* top_level_ctx : ctx->toplevel_item()) {
           Decl* decl = (Decl*) visitToplevel_item(top_level_ctx);
-          decls.push_back(decl);
+          if (decl) {
+            decls.push_back(decl);
+          }
       }
 
       return new Program(decls, ctx->start->getLine());

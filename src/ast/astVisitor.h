@@ -16,10 +16,9 @@ public:
   }
 
   virtual ErrorType visitProgram(const Program *program) {
-    std::vector<Decl *> decls = program->getDecls();
     bool to_return = true;
-    for (int i = 0; i < decls.size(); i++) {
-      to_return = to_return && visitDecl(decls[i]);
+    for (auto decl : program->getDecls()) {
+      to_return = to_return && visitDecl(decl);
     }
     return to_return;
   }

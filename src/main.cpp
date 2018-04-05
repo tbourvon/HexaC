@@ -39,11 +39,13 @@ int main(int argc, const char* argv[]) {
   ASTPrinter printer;
     cout << endl << "-----------------------------" << endl << "AST : " << endl << endl;
 
-    printer.visitAST(&ast);
+  printer.visitAST(&ast);
 
   TypeVisitor typeChecking;
   cout << endl << "-----------------------------" << endl << "Vérification Type : " << endl << endl;
-  typeChecking.visitAST(&ast);
+  if (!typeChecking.visitAST(&ast)) {
+    return -1;
+  }
 
   IRGenerator irg;
   auto cfgs = irg.generateIR(&ast);
@@ -61,9 +63,6 @@ int main(int argc, const char* argv[]) {
   for (auto cfg : cfgs) {
     cfg->gen_asm(assembly);
   }
-
-    cout << endl << "-----------------------------" << endl << outputFileName << ".s : " << endl << endl;
-    std::cout << assembly.str() << std::endl;
 
   std::ofstream outfile;
   outfile.open(outputFileName+".s");
