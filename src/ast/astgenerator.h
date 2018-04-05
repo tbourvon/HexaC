@@ -115,7 +115,12 @@ vect.push_back(p);
         } else if (ctx->CHAR_LIT()) {
             return (Expr*)(new CharLiteral(ctx->CHAR_LIT()->getText()[1], ctx->start->getLine()));
         } else if (ctx->ID()) {
-            return (Expr*)(new DeclRefExpr(getDeclByName(ctx->ID()->getText()), m_nextDeclRefIsLvalue ? DeclRefExpr::Kind::LVALUE : DeclRefExpr::Kind::RVALUE, ctx->start->getLine()));
+            auto decl = getDeclByName(ctx->ID()->getText());
+            if (!decl) {
+                std::cout << "error:" << ctx->start->getLine() << ": Unknown name '" << ctx->ID()->getText() << "'" << std::endl;
+                return nullptr;
+            }
+            return (Expr*)(new DeclRefExpr(decl, m_nextDeclRefIsLvalue ? DeclRefExpr::Kind::LVALUE : DeclRefExpr::Kind::RVALUE), ctx->start->getLine());
         }
 
         return nullptr;
@@ -245,6 +250,9 @@ vect.push_back(p);
 protected:
     Decl* getDeclByName(const std::string& name) {
         auto table = m_scopeDeclarationTable.at(m_currentScope);
+        if (!table.count(name)) {
+            return nullptr;
+        }
         return table.at(name);
     }
 
