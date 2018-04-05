@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include "../ast/ast.h"
-#include "../ast/astvisitor.h"
-#include "ir.h"
+#include "../ast/astVisitor.h"
+#include "IR.h"
 
 using namespace HexaC;
 
@@ -17,27 +17,22 @@ public:
     return m_cfgs;
   }
 
-  virtual ErrorType visitProgram(const Program *program) override {
-    for (auto decl : program->getDecls()) {
-      visitDecl(decl);
-    }
-  }
-
   virtual ErrorType visitFuncDecl(const FuncDecl *fd) override {
     CFG* cfg = new CFG(fd);
     m_currentCFG = cfg;
-
-    visitBlockStmt(fd->getBlock());
-
     m_cfgs.push_back(cfg);
+
+
+    return visitBlockStmt(fd->getBlock());
   }
 
   virtual ErrorType visitVarDecl(const VarDecl *vd) override {
     m_currentCFG->add_to_symbol_table(vd->getName(), vd->getType());
+    return true;
   }
 
   virtual ErrorType visitExprStmt(const ExprStmt* exprStmt) override {
-    visitExprIR(exprStmt->getExpr());
+    return !visitExprIR(exprStmt->getExpr()).empty();
   }
 
   virtual std::string visitExprIR(const Expr *expr) {
@@ -59,6 +54,8 @@ public:
     if (const DeclRefExpr *dre = dynamic_cast<const DeclRefExpr *>(expr)) {
       return visitDeclRefExprIR(dre);
     }
+
+    return "";
   }
 
   virtual std::string visitBinaryOpIR(const BinaryOp *binop) {
@@ -96,7 +93,11 @@ public:
         m_currentCFG->current_bb->add_IRInstr(IRInstr::cmp_lt, exprType, {resTemp, lhsTemp, rhsTemp});
         return resTemp;
       }
+
+      default: return "";
     }
+
+    return "";
   }
 
   virtual std::string visitGroupExprIR(const GroupExpr *ge) {
@@ -117,7 +118,11 @@ public:
         m_currentCFG->current_bb->add_IRInstr(IRInstr::add, exprType, {temp, temp, constTmp});
         return resTmp;
       }
+
+      default: return "";
     }
+
+    return "";
   }
 
   virtual std::string visitDeclRefExprIR(const DeclRefExpr *ref) {
@@ -135,6 +140,8 @@ public:
         return ptrVar;
       }
     }
+
+    return "";
   }
 
   virtual std::string visitLiteralExprIR(const LiteralExpr *le) {
@@ -144,6 +151,8 @@ public:
     if (const CharLiteral *cl = dynamic_cast<const CharLiteral *>(le)) {
       return visitCharLiteralIR(cl);
     }
+
+    return "";
   }
 
   virtual std::string visitIntegerLiteralIR(const IntegerLiteral *intLit) {
@@ -158,21 +167,23 @@ public:
     return temp;
   }
 
-  virtual ErrorType visitIfStmt(const IfStmt *ifStmt) {
-    visitExprIR(ifStmt->getCond());
+  virtual ErrorType visitIfStmt(const IfStmt *ifStmt) override {
+    bool ret = true;
+
+    ret = ret && !visitExprIR(ifStmt->getCond()).empty();
 
     auto condBB = m_currentCFG->current_bb;
 
     auto thenBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(thenBB);
     m_currentCFG->current_bb = thenBB;
-    visitStmt(ifStmt->getStmt());
+    ret = ret && visitStmt(ifStmt->getStmt());
 
     auto elseBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(elseBB);
     m_currentCFG->current_bb = elseBB;
     if (ifStmt->getElseStmt()) {
-      visitStmt(ifStmt->getElseStmt());
+      ret = ret && visitStmt(ifStmt->getElseStmt());
     }
 
     auto afterIfBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
@@ -191,21 +202,23 @@ public:
     elseBB->exit_true = afterIfBB;
     elseBB->exit_false = nullptr;
 
+    return ret;
   }
 
-  virtual ErrorType visitWhileStmt(const WhileStmt *whileStmt) {
+  virtual ErrorType visitWhileStmt(const WhileStmt *whileStmt) override {
+    bool ret = true;
 
     auto beforeWhileBB = m_currentCFG->current_bb;
 
     auto condBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(condBB);
     m_currentCFG->current_bb = condBB;
-    visitExprIR(whileStmt->getCond());
+    ret = ret && !visitExprIR(whileStmt->getCond()).empty();
 
     auto bodyBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(bodyBB);
     m_currentCFG->current_bb = bodyBB;
-    visitStmt(whileStmt->getStmt());
+    ret = ret && visitStmt(whileStmt->getStmt());
 
     auto afterWhileBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(afterWhileBB);
@@ -222,27 +235,44 @@ public:
 
     bodyBB->exit_true = condBB;
     bodyBB->exit_false = nullptr;
+
+    return ret;
   }
 
   virtual std::string visitCallExprIR(const CallExpr* ce) {
     const Type* retType = getExpressionType(ce->getCallee());
     std::string temp = m_currentCFG->create_new_tempvar(retType);
-    std::vector<std::string> irVec = {temp, visitExprIR(ce->getCallee())};
+    auto callee = visitExprIR(ce->getCallee());
+    if (callee.empty()) {
+      return "";
+    }
+
+    std::vector<std::string> irVec = {temp, callee};
     for (auto arg : ce->getArgs()) {
-      irVec.push_back(visitExprIR(arg));
+      auto arg_str = visitExprIR(arg);
+      if (arg_str.empty()) {
+        return "";
+      }
+
+      irVec.push_back(arg_str);
     }
     m_currentCFG->current_bb->add_IRInstr(IRInstr::call, retType, irVec);
 
     return temp;
   }
 
-  virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) {
+  virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) override {
     if (returnStmt->getExpr()) {
       std::string temp = visitExprIR(returnStmt->getExpr());
+      if (temp.empty()) {
+        return false;
+      }
       m_currentCFG->current_bb->add_IRInstr(IRInstr::ret, new BuiltinType(BuiltinType::Kind::INT32_T), {temp});
     } else {
       m_currentCFG->current_bb->add_IRInstr(IRInstr::ret, new BuiltinType(BuiltinType::Kind::VOID), {});
     }
+
+    return true;
   }
 
 protected:

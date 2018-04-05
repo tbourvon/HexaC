@@ -150,7 +150,7 @@ public:
   }
 
   virtual ErrorType visitIfStmt(const IfStmt *ifStmt) {
-    return visitExpr(ifStmt->getCond()) && visitStmt(ifStmt->getStmt()) && visitStmt(ifStmt->getElseStmt());
+    return visitExpr(ifStmt->getCond()) && visitStmt(ifStmt->getStmt()) && (!ifStmt->getElseStmt() || visitStmt(ifStmt->getElseStmt()));
   }
 
   virtual ErrorType visitWhileStmt(const WhileStmt *wStmt) {

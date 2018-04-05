@@ -16,13 +16,13 @@ class TypeVisitor : public ASTVisitor {
 
     const BuiltinType *bitl;
     const BuiltinType *bitr;
-    if (bitl = dynamic_cast<const BuiltinType *>(getExpressionType(bo->getLeftHandSide()))) {
+    if ((bitl = dynamic_cast<const BuiltinType *>(getExpressionType(bo->getLeftHandSide())))) {
      
     } else {
       std::cout << "casting bop" << std::endl;
       return false;
     }
-    if (bitr = dynamic_cast<const BuiltinType *>(getExpressionType(bo->getRightHandSide()))) {
+    if ((bitr = dynamic_cast<const BuiltinType *>(getExpressionType(bo->getRightHandSide())))) {
       
     } else {
       std::cout << "casting bop" << std::endl;
@@ -44,8 +44,7 @@ class TypeVisitor : public ASTVisitor {
       return false;
     }
 
-    visitExpr(bo->getLeftHandSide());
-    visitExpr(bo->getRightHandSide());
+    return visitExpr(bo->getLeftHandSide()) && visitExpr(bo->getRightHandSide());
   }
 
   virtual ErrorType visitCallExpr(const CallExpr *ce) {

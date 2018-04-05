@@ -3,12 +3,14 @@
 
 #include <iostream>
 #include "ast.h"
-#include "astvisitor.h"
+#include "astVisitor.h"
 
 using namespace HexaC;
 
 class ASTPrinter : public ASTVisitor {
 public:
+
+
   ASTPrinter() {}
 
   virtual ErrorType visitProgram(const Program *program) override {
@@ -19,6 +21,8 @@ public:
       visitDecl(decl);
     }
     popLevel();
+
+    return true;
   }
 
   virtual ErrorType visitFuncDecl(const FuncDecl *fd) override {
@@ -43,6 +47,8 @@ public:
       pushLevel();
       visitBlockStmt(fd->getBlock());
       popLevel();
+
+      return true;
   }
 
   virtual ErrorType visitVarDecl(const VarDecl *vd) override {
@@ -50,6 +56,8 @@ public:
       pushLevel();
       visitExpr(vd->getExpr());
       popLevel();
+
+      return true;
   }
 
   virtual ErrorType visitBlockStmt(const BlockStmt *block) override {
@@ -57,6 +65,8 @@ public:
     for (int i = 0; i < stmts.size(); i++) {
       visitStmt(stmts[i]);
     }
+
+    return true;
   }
 
   virtual ErrorType visitBinaryOp(const BinaryOp *binop) override {
@@ -65,6 +75,8 @@ public:
     visitExpr(binop->getLeftHandSide());
     visitExpr(binop->getRightHandSide());
     popLevel();
+
+    return true;
   }
 
   virtual ErrorType visitUnaryOp(const UnaryOp *unop) override {
@@ -72,28 +84,38 @@ public:
     pushLevel();
     visitExpr(unop->getExpr());
     popLevel();
+
+    return true;
   }
 
-  virtual ErrorType visitDeclRefExpr(const DeclRefExpr *ref) {
+  virtual ErrorType visitDeclRefExpr(const DeclRefExpr *ref) override {
     prettyPrint("DeclRefExpr '" + ref->getDecl()->getName() + "' " + (ref->getKind() == DeclRefExpr::Kind::LVALUE ? "lvalue" : "rvalue"));
+
+    return true;
   }
 
-  virtual ErrorType visitIntegerLiteral(const IntegerLiteral *intLit) {
+  virtual ErrorType visitIntegerLiteral(const IntegerLiteral *intLit) override {
     prettyPrint("IntegerLiteral '" + std::to_string(intLit->getValue()) + "'");
+
+    return true;
   }
 
-  virtual ErrorType visitCharLiteral(const CharLiteral *charLit) {
+  virtual ErrorType visitCharLiteral(const CharLiteral *charLit) override {
     prettyPrint("CharLiteral '" + std::to_string(charLit->getValue()) + "'");
+
+    return true;
   }
 
-  virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) {
+  virtual ErrorType visitReturnStmt(const ReturnStmt *returnStmt) override {
     prettyPrint("ReturnStmt");
     pushLevel();
     visitExpr(returnStmt->getExpr());
     popLevel();
+
+    return true;
   }
 
-  virtual ErrorType visitIfStmt(const IfStmt *ifStmt) {
+  virtual ErrorType visitIfStmt(const IfStmt *ifStmt) override {
     prettyPrint("IfStmt");
     pushLevel();
     visitExpr(ifStmt->getCond());
@@ -102,17 +124,21 @@ public:
       visitStmt(ifStmt->getElseStmt());
     }
     popLevel();
+
+    return true;
   }
 
-  virtual ErrorType visitWhileStmt(const WhileStmt *whileStmt) {
+  virtual ErrorType visitWhileStmt(const WhileStmt *whileStmt) override {
     prettyPrint("WhileStmt");
     pushLevel();
     visitExpr(whileStmt->getCond());
     visitStmt(whileStmt->getStmt());
     popLevel();
+
+    return true;
   }
 
-  virtual ErrorType visitCallExpr(const CallExpr* ce) {
+  virtual ErrorType visitCallExpr(const CallExpr* ce) override {
     prettyPrint("CallExpr");
     pushLevel();
     visitExpr(ce->getCallee());
@@ -120,6 +146,8 @@ public:
       visitExpr(arg);
     }
     popLevel();
+
+    return true;
   }
 
 protected:
@@ -144,6 +172,8 @@ protected:
         case BuiltinType::Kind::VOID: return "void";
       }
     }
+
+    return "";
   }
 
   std::string binopKindToString(BinaryOp::Kind kind) {
