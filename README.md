@@ -15,7 +15,7 @@
 - [x] 5.6 Compiler le if ... else
 - [x] 5.7 Compiler les boucles while
 - [x] 5.8 Compiler le retour de valeur
-- [ ] 5.9 Compiler l’affectation à une lvalue quelconque
+- [x] 5.9 Compiler l’affectation à une lvalue quelconque
 - [ ] 5.10 Compiler des tableaux
 - [ ] 5.11 Compiler les appels de fonction ayant jusqu’à 6 arguments
 - [ ] 5.12 Compiler les boucles for
