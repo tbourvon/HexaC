@@ -23,19 +23,64 @@
 - [ ] 5.14 Gestion correcte des types
 - [ ] 5.15 Compiler les appels de fonction ayant plus de 6 arguments
 
+### Points notables
+
+Vis à vis des fonctionnalitées décrites ci-dessus, beaucoup de bugs ont été corrigés depuis la présentation, notamment :
+- La vérification de la concordance de types en analyse statique fonctionne à nouveau (elle ne respecte pas le standard C : les types doivent correspondre exactement, sauf entre int32_t et int64_t)
+- Les fonctions récursives fonctionnent
+- Les paramètres fonctionnent
+
+### Points manquants
+
+Certains endroits du code de génération d'assembleur sont hardcodés de façon assez inflexible, mais fonctionnent très bien pour les fonctionnalitées présentées ici.
+
+Pas d'optimisation.
+
+La génération d'IR pour les opérations binaires suivantes n'est pas implémentée :
+
+DIV '/', MOD '%', ASSIGN_MULT '*=', ASSIGN_DIV '/=', ASSIGN_MOD '%=', ASSIGN_ADD '+=', ASSIGN_SUB '-=', ASSIGN_OR '|=', ASSIGN_AND '&=', ASSIGN_XOR '^=', NEQ '!=', OR '||', AND '&&', BOR '|', BAND '&', LSH '<<', RSH '>>', XOR '^', GT '>', GE '>=', LE '<=', COMMA ','
+
+Les opérations binaires dont la génération d'IR est actuellement implémentée sont :
+
+ADD '+', SUB '-', MULT '*', EQ '==', ASSIGN '='
+
+La génération d'IR pour les opérations unaires suivantes n'est pas implémentée :
+
+POST_INC '++', POST_DEC '--', PRE_DEC '--', PLUS '+', MINUS '-', NOT '!'
+
+Les opérations unaires dont la génération d'IR est actuellement implémentée sont :
+
+PRE_INC '++'
+
 ## Build
-Le projet est complié avec cmake
+Le projet est compilé avec cmake
 
 ```bash
-$ cd cmake
+$ mkdir build
+$ cd build
 $ cmake ../ && make
 ```
 
 ## Usage
 
+Compilation simple :
+
 ```bash
 $ ./HexaC test.c test # Compiler test.c avec notre programme
-$ as -o test.o test.s # Assemblage
-$ gcc -lc test.o      # Création de l'executable
-$ ./a.out             # Lancer l'executable
+$ ./test              # Lancer l'executable
 ```
+
+**ATTENTION, les options utilisées ci-dessous sont hardcodées sur le 3ème paramètre (nous n'avons pas eu le temps de mettre en place un vrai parsing des arguments du programme via une bibliothèque externe).**
+
+Pour activer l'analyse statique (pour l'instant uniquement vérification de la concordance des types) :
+
+```bash
+$ ./HexaC test.c test -a
+```
+
+Pour activer le pretty print de l'AST :
+
+```bash
+$ ./HexaC test.c test -p
+```
+
