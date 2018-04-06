@@ -47,6 +47,8 @@ done
 
 - Pas d'optimisation.
 
+- La gestion des erreurs fonctionne bien pour le frontend (lexicale, syntaxique et sémantique), mais est incomplète pour le backend.
+
 - La génération d'IR pour les opérations binaires suivantes n'est pas implémentée :
 
 DIV '/', MOD '%', ASSIGN_MULT '*=', ASSIGN_DIV '/=', ASSIGN_MOD '%=', ASSIGN_ADD '+=', ASSIGN_SUB '-=', ASSIGN_OR '|=', ASSIGN_AND '&=', ASSIGN_XOR '^=', NEQ '!=', OR '||', AND '&&', BOR '|', BAND '&', LSH '<<', RSH '>>', XOR '^', GT '>', GE '>=', LE '<=', COMMA ','

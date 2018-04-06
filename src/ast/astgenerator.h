@@ -128,7 +128,7 @@ vect.push_back(p);
         } else if (ctx->ID()) {
             auto decl = getDeclByName(ctx->ID()->getText());
             if (!decl) {
-                std::cout << "error:" << ctx->start->getLine() << ": Unknown name '" << ctx->ID()->getText() << "'" << std::endl;
+                std::cout << "error:" << ctx->start->getLine() << ": Missing declaration for '" << ctx->ID()->getText() << "'" << std::endl;
                 return nullptr;
             }
             return (Expr*)(new DeclRefExpr(decl, (m_nextDeclRefIsLvalue ? DeclRefExpr::Kind::LVALUE : DeclRefExpr::Kind::RVALUE), ctx->start->getLine()));
