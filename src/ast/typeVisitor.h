@@ -30,21 +30,22 @@ class TypeVisitor : public ASTVisitor {
     }
     int intls = (int)bitl->getKind();
     int intrs = (int)bitr->getKind();
-    //std::cout << "lhs : " << (int)bitl->getKind()
-    //            << " / rhs : " << (int)bitr->getKind() << std::endl;
-
+    bool type_checking = true;
     if (!( (intls == intrs) 
         || ((intls == 0) && (intrs == 1)) 
         || ((intls == 1) && (intrs == 0)) )) {
-
-      //std::cout << "debug binary op" << std::endl;
-      //std::cout << "lhs : " << (int)bitl->getKind()
-      //          << " / rhs : " << (int)bitr->getKind() << std::endl;
       std::cout  <<  "line " << bo->getLine() << " : incompatible type - expected (on the right hand side) " << bitl->getKindName() << ", found " << bitr->getKindName() << std::endl;
+      type_checking = false;
+    }
+    if(type_checking)
+    {
+      bool bool_lhs = visitExpr(bo->getLeftHandSide());
+      return  visitExpr(bo->getRightHandSide()) && bool_lhs;
+      }
+    else{
+      visitExpr(bo->getLeftHandSide()) && visitExpr(bo->getRightHandSide());
       return false;
     }
-
-    return visitExpr(bo->getLeftHandSide()) && visitExpr(bo->getRightHandSide());
   }
 
   virtual ErrorType visitCallExpr(const CallExpr *ce) {
@@ -55,17 +56,19 @@ class TypeVisitor : public ASTVisitor {
       const Decl *d = dre->getDecl();
       if (const FuncDecl *fd = dynamic_cast<const FuncDecl *>(d)) {
         const std::vector<Param *> params = fd->getParams();
+        bool nbr_param_checking = true;
         if (params.size() != args.size()) {
+          nbr_param_checking = false;
           if(params.size() > args.size()){
-                std::cout << "line " << ce->getLine() << " : not enough parameters - expected " << params.size() << " parameters, found " << args.size() << " parameters" << std::endl; 
+            std::cout << "line " << ce->getLine() << " : not enough parameters - expected " << params.size() << " parameters, found " << args.size() << " parameters" << std::endl; 
           } else {
             std::cout << "line " << ce->getLine() << " : too many parameters - expected " << params.size() << " parameters, found " << args.size() << " parameters" << std::endl; 
           }
-          //std::cout << "debug function decl size" << std::endl;
-          //std::cout << "nb param : " << params.size() << " nb args : " << args.size() << std::endl;
-          return false;
+          if(!nbr_param_checking)
+          {return false;}
         }
         int i = 0;
+        bool type_param_checking = true;
         for (auto param : params) {
           const Type *t_param = param->getType();
           const Type *t_arg = getExpressionType(args[i]);
@@ -73,20 +76,16 @@ class TypeVisitor : public ASTVisitor {
           const BuiltinType *bit_arg = dynamic_cast<const BuiltinType *>(t_arg);
 
           if(!bit_param || !bit_arg){
-            //std::cout << "casting uo" << std::endl;
             std::cout << "line " << ce->getLine() << " : invalid parameter" << std::endl;
             return false;
           }
 
           if (bit_param->getKind() != bit_arg->getKind() ) {
-            //std::cout << "debug function decl param" << std::endl;
-            //std::cout << "param : " << param << " nb args : " << args.size() << std::endl;
              std::cout << "line " << ce->getLine() << " : incompatible type - expected " << bit_param->getKindName() << ", found " << bit_arg->getKindName() << std::endl;
-            return false;
           }
           i++;
         }
-        return true;
+        return type_param_checking;
       }
     }
     //std::cout << "debug call expr" << std::endl;
@@ -122,7 +121,8 @@ class TypeVisitor : public ASTVisitor {
 
     return typeChecking;
   }
-
+protected:
+  std::vector<std::string> m_error_vec;
 
 };
 

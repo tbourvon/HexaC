@@ -55,23 +55,30 @@ public:
 
   virtual ErrorType visitExpr(const Expr *expr) {
     if (const BinaryOp *bo = dynamic_cast<const BinaryOp *>(expr)) {
+      //std::cout << "  Binary op" << std::endl;
       return visitBinaryOp(bo);
     }
     if (const UnaryOp *uo = dynamic_cast<const UnaryOp *>(expr)) {
+      //std::cout << "  Unary op" << std::endl;
       return visitUnaryOp(uo);
     }
     if (const CallExpr *ce = dynamic_cast<const CallExpr *>(expr)) {
+      //std::cout << "  Call expr" << std::endl;
       return visitCallExpr(ce);
     }
     if (const GroupExpr *ge = dynamic_cast<const GroupExpr *>(expr)) {
+      //std::cout << "  group expr" << std::endl;
       return visitGroupExpr(ge);
     }
     if (const LiteralExpr *le = dynamic_cast<const LiteralExpr *>(expr)) {
+      //std::cout << "  Litteral Expr" << std::endl;
       return visitLiteralExpr(le);
     }
     if (const DeclRefExpr *dre = dynamic_cast<const DeclRefExpr *>(expr)) {
+      //std::cout << "  Decl ref expr" << std::endl;
       return visitDeclRefExpr(dre);
     }
+    //std::cout << "Expr non identifiée" << std::endl;
     return false;
   }
 
@@ -160,14 +167,15 @@ public:
   }
 
   virtual ErrorType visitWhileStmt(const WhileStmt *wStmt) {
-    return visitExpr(wStmt->getCond()) && visitStmt(wStmt->getStmt());
+    bool bool_expr = visitExpr(wStmt->getCond());
+    return  visitStmt(wStmt->getStmt()) && bool_expr;
   }
 
   virtual ErrorType visitBlockStmt(const BlockStmt *bStmt) {
     std::vector<Stmt *> stmts = bStmt->getBody();
     bool to_return = true;
     for (int i = 0; i < stmts.size(); i++) {
-      to_return = to_return && visitStmt(stmts[i]);
+      to_return =  visitStmt(stmts[i]) && to_return;
     }
     return to_return;
   }
