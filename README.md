@@ -32,23 +32,34 @@ Vis à vis des fonctionnalitées décrites ci-dessus, beaucoup de bugs ont été
 
 ### Points manquants
 
-Certains endroits du code de génération d'assembleur sont hardcodés de façon assez inflexible, mais fonctionnent très bien pour les fonctionnalitées présentées ici.
+- Pas de tests automatisés ni d'unit tests : nous avons uniquement utilisé les tests front-end et back-end fournis sur Moodle avec une commande du type :
 
-Pas d'optimisation.
+```bash
+for file in FrontEndTests/ValidPrograms/*
+do
+./HexaC "$file" test && ./test
+done
+```
 
-La génération d'IR pour les opérations binaires suivantes n'est pas implémentée :
+- Très peu de commentaires. Cependant, le nommage a été choisi pour être assez explicite, et l'organisation des classes a été bien étudiée. Nous pensons donc que le code s'auto-documente assez bien dans sa globalité.
+
+- Certains endroits du code de génération d'assembleur sont hardcodés de façon assez inflexible, mais fonctionnent très bien pour les fonctionnalitées présentées ici.
+
+- Pas d'optimisation.
+
+- La génération d'IR pour les opérations binaires suivantes n'est pas implémentée :
 
 DIV '/', MOD '%', ASSIGN_MULT '*=', ASSIGN_DIV '/=', ASSIGN_MOD '%=', ASSIGN_ADD '+=', ASSIGN_SUB '-=', ASSIGN_OR '|=', ASSIGN_AND '&=', ASSIGN_XOR '^=', NEQ '!=', OR '||', AND '&&', BOR '|', BAND '&', LSH '<<', RSH '>>', XOR '^', GT '>', GE '>=', LE '<=', COMMA ','
 
-Les opérations binaires dont la génération d'IR est actuellement implémentée sont :
+- Les opérations binaires dont la génération d'IR est actuellement implémentée sont :
 
 ADD '+', SUB '-', MULT '*', EQ '==', ASSIGN '='
 
-La génération d'IR pour les opérations unaires suivantes n'est pas implémentée :
+- La génération d'IR pour les opérations unaires suivantes n'est pas implémentée :
 
 POST_INC '++', POST_DEC '--', PRE_DEC '--', PLUS '+', MINUS '-', NOT '!'
 
-Les opérations unaires dont la génération d'IR est actuellement implémentée sont :
+- Les opérations unaires dont la génération d'IR est actuellement implémentée sont :
 
 PRE_INC '++'
 
