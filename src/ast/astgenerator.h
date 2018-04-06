@@ -173,7 +173,7 @@ vect.push_back(p);
     virtual antlrcpp::Any visitIf_stmt(HexaCParser::If_stmtContext *ctx) override {
         Expr* cond = visit(ctx->expr());
         Stmt* ifStmt = visit(ctx->stmt_if);
-        Stmt* elseStmt = ctx->stmt_else ? (Stmt*)visit(ctx->stmt_else) : nullptr;
+        Stmt* elseStmt = (ctx->stmt_else ? (Stmt*)visit(ctx->stmt_else) : nullptr);
 
         return new IfStmt(cond, ifStmt, elseStmt, ctx->start->getLine());
     };
@@ -233,12 +233,25 @@ vect.push_back(p);
     }
 
     virtual antlrcpp::Any visitParam(HexaCParser::ParamContext *ctx) override {
-        return new Param(ctx->getText(), visitType(ctx->type()), nullptr, ctx->start->getLine()); // FIXME: add default value
+        auto p = new Param(ctx->ID()->getText(), visitType(ctx->type()), nullptr, ctx->start->getLine()); // FIXME: add default value
+        m_scopeDeclarationTable.at(m_currentScope)[p->getName()] = p;
+        return p;
     }
 
     virtual antlrcpp::Any visitFunc_decl(HexaCParser::Func_declContext *ctx) override {
-        auto fd = new FuncDecl(ctx->ID()->getText(), visitType(ctx->type()), visitParam_list(ctx->param_list()), visitBlock(ctx->block()), ctx->start->getLine());
+        auto fd = new FuncDecl(ctx->ID()->getText(), visitType(ctx->type()), {}, nullptr, ctx->start->getLine());
         m_scopeDeclarationTable.at(m_currentScope)[fd->getName()] = fd;
+
+        int parentScope = m_currentScope;
+        m_scopeDeclarationTable[++m_topScopeNumber] = m_scopeDeclarationTable.at(parentScope);
+        m_currentScope = m_topScopeNumber;
+
+        fd->setParams(visitParam_list(ctx->param_list()));
+
+        fd->setBlock(visitBlock(ctx->block()));
+
+        m_currentScope = parentScope;
+
         return (Decl*)fd;
     }
 

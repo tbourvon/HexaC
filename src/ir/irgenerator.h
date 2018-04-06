@@ -22,11 +22,45 @@ public:
     m_currentCFG = cfg;
     m_cfgs.push_back(cfg);
 
-    return visitBlockStmt(fd->getBlock());
+    bool ret = true;
+    for (auto p : fd->getParams()) {
+      ret = ret && visitParam(p);
+    }
+
+    return ret && visitBlockStmt(fd->getBlock());
   }
 
   virtual ErrorType visitVarDecl(const VarDecl *vd) override {
+    if (const Param* p = dynamic_cast<const Param*>(vd)) {
+      return visitParam(p);
+    }
+
     m_currentCFG->add_to_symbol_table(vd->getName(), vd->getType());
+    return true;
+  }
+
+  virtual ErrorType visitParam(const Param* p) override {
+    for (int i = 0; i < m_currentCFG->ast->getParams().size(); i++) { // A bit ugly but not very important
+      if (m_currentCFG->ast->getParams().at(i) == p) {
+        m_currentCFG->add_to_symbol_table(p->getName(), p->getType());
+
+        string reg = "";
+        switch(i) {
+            case 0: reg = "%rdi"; break;
+            case 1: reg = "%rsi"; break;
+            case 2: reg = "%rdx"; break;
+            case 3: reg = "%rcx"; break;
+            case 4: reg = "%r8"; break;
+            case 5: reg = "%r9"; break;
+        }
+        std::string ptrVar = m_currentCFG->create_new_tempvar(p->getType());
+        int offset = m_currentCFG->get_var_index(p->getName());
+        m_currentCFG->current_bb->add_IRInstr(IRInstr::ldconst, new BuiltinType(BuiltinType::Kind::INT64_T), {ptrVar, std::to_string(offset)});
+        m_currentCFG->current_bb->add_IRInstr(IRInstr::add, new BuiltinType(BuiltinType::Kind::INT64_T), {ptrVar, "!bp", ptrVar});
+        m_currentCFG->current_bb->add_IRInstr(IRInstr::wmem, p->getType(), {ptrVar, reg});
+        break;
+      }
+    }
     return true;
   }
 
@@ -67,6 +101,12 @@ public:
       case BinaryOp::Kind::ADD: {
         std::string resTemp = m_currentCFG->create_new_tempvar(exprType);
         m_currentCFG->current_bb->add_IRInstr(IRInstr::add, exprType, {resTemp, lhsTemp, rhsTemp});
+        return resTemp;
+      }
+
+      case BinaryOp::Kind::SUB: {
+        std::string resTemp = m_currentCFG->create_new_tempvar(exprType);
+        m_currentCFG->current_bb->add_IRInstr(IRInstr::sub, exprType, {resTemp, lhsTemp, rhsTemp});
         return resTemp;
       }
 
@@ -175,19 +215,10 @@ public:
 
     auto thenBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(thenBB);
-    m_currentCFG->current_bb = thenBB;
-    ret = ret && visitStmt(ifStmt->getStmt());
-
     auto elseBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(elseBB);
-    m_currentCFG->current_bb = elseBB;
-    if (ifStmt->getElseStmt()) {
-      ret = ret && visitStmt(ifStmt->getElseStmt());
-    }
-
     auto afterIfBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(afterIfBB);
-    m_currentCFG->current_bb = afterIfBB;
 
     afterIfBB->exit_true = condBB->exit_true;
     afterIfBB->exit_false = condBB->exit_false;
@@ -201,6 +232,16 @@ public:
     elseBB->exit_true = afterIfBB;
     elseBB->exit_false = nullptr;
 
+    m_currentCFG->current_bb = thenBB;
+    ret = ret && visitStmt(ifStmt->getStmt());
+
+    m_currentCFG->current_bb = elseBB;
+    if (ifStmt->getElseStmt()) {
+      ret = ret && visitStmt(ifStmt->getElseStmt());
+    }
+
+    m_currentCFG->current_bb = afterIfBB;
+
     return ret;
   }
 
@@ -211,17 +252,10 @@ public:
 
     auto condBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(condBB);
-    m_currentCFG->current_bb = condBB;
-    ret = ret && !visitExprIR(whileStmt->getCond()).empty();
-
     auto bodyBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(bodyBB);
-    m_currentCFG->current_bb = bodyBB;
-    ret = ret && visitStmt(whileStmt->getStmt());
-
     auto afterWhileBB = new BasicBlock(m_currentCFG, m_currentCFG->new_BB_name());
     m_currentCFG->add_bb(afterWhileBB);
-    m_currentCFG->current_bb = afterWhileBB;
 
     afterWhileBB->exit_true = beforeWhileBB->exit_true;
     afterWhileBB->exit_false = beforeWhileBB->exit_false;
@@ -234,6 +268,14 @@ public:
 
     bodyBB->exit_true = condBB;
     bodyBB->exit_false = nullptr;
+
+    m_currentCFG->current_bb = condBB;
+    ret = ret && !visitExprIR(whileStmt->getCond()).empty();
+
+    m_currentCFG->current_bb = bodyBB;
+    ret = ret && visitStmt(whileStmt->getStmt());
+
+    m_currentCFG->current_bb = afterWhileBB;
 
     return ret;
   }

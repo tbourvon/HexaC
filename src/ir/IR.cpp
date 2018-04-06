@@ -68,9 +68,14 @@ void IRInstr::gen_asm(ostream& out) {
             break;
         case Operation::wmem :
             indexDest = bb->cfg->get_var_index(params[0]);
-            indexParam1 = bb->cfg->get_var_index(params[1]);
             out << "movq " << indexDest << "(%rbp), %rax" << endl;
-            out << "movq " << indexParam1 << "(%rbp), %r10" << endl;
+            if (params[1] == "%rdi" || params[1] == "%rsi" || params[1] == "%rdx" || params[1] == "%rcx" || params[1] == "%r8" || params[1] == "%r9") {
+                out << "movq " << params[1] << ", %r10" << endl;
+            } else {
+                indexParam1 = bb->cfg->get_var_index(params[1]);
+                out << "movq " << indexParam1 << "(%rbp), %r10" << endl;
+            }
+
             out << "movq %r10, (%rax)" << endl;
             break;
 
@@ -93,21 +98,21 @@ void IRInstr::gen_asm(ostream& out) {
               case 2: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rdx" << endl; break;
               case 3: out << "movq " << bb->cfg->get_var_index(params[i]) << "(%rbp), %rcx" << endl; break;
               case 4: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %r8" << endl; break;
-              case 5: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %rç" << endl; break;
+              case 5: out << "movq "  << bb->cfg->get_var_index(params[i]) << "(%rbp), %r9" << endl; break;
           }
       }
 
       out << "movb $0, %al" << endl;
       out << "callq " << funcToCall << endl;
       if (dynamic_cast<const BuiltinType*>(t)->getKind() != BuiltinType::Kind::VOID) {
-        out << "movl %eax, " << indexDest << "(%rbp)" << endl;
+        out << "movq %rax, " << indexDest << "(%rbp)" << endl;
       }
       break;
     }
     case Operation::ret :
       if (!params.empty()) {
         indexDest = bb->cfg->get_var_index(params[0]);
-        out << "movl" << indexDest <<"(%rbp), %eax" << endl;
+        out << "movq" << indexDest <<"(%rbp), %rax" << endl;
       }
 
       out << "jmp " << bb->cfg->out_bb->label << endl;
@@ -200,9 +205,9 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
     auto firstBB = new BasicBlock(this, ast->getName());
     add_bb(firstBB);
 
-  auto lastBB = new BasicBlock(this, new_BB_name());
-  add_bb(lastBB);
-  out_bb = lastBB;
+    auto lastBB = new BasicBlock(this, new_BB_name());
+    add_bb(lastBB);
+    out_bb = lastBB;
 
     firstBB->exit_false = nullptr;
     firstBB->exit_true = lastBB;
@@ -212,8 +217,8 @@ CFG::CFG(const FuncDecl* _ast) : ast(_ast), nextBBnumber(0), nextFreeSymbolIndex
 
     current_bb = firstBB;
 
-  SymbolType["!bp"] = new BuiltinType(BuiltinType::Kind::VOID);
-  SymbolIndex["!bp"] = 0;
+    SymbolType["!bp"] = new BuiltinType(BuiltinType::Kind::VOID);
+    SymbolIndex["!bp"] = 0;
 }
 
 std::string CFG::new_BB_name() {

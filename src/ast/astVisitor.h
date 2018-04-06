@@ -43,6 +43,10 @@ public:
   }
 
   virtual ErrorType visitVarDecl(const VarDecl *vd) {
+    if (const Param *p = dynamic_cast<const Param*>(vd)) {
+      return visitParam(p);
+    }
+
     if (!vd->getExpr()) {
       return true;
     }
@@ -169,6 +173,10 @@ public:
   }
 
   virtual ErrorType visitParam(const Param *param) {
+    if (!param->getExpr()) {
+      return true;
+    }
+
     return visitExpr(param->getExpr());
   }
 

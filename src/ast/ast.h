@@ -148,6 +148,9 @@ FuncDecl(const std::string &m_name, Type *m_returnType,
   const std::vector<Param *> getParams() const { return m_params; }
   const BlockStmt *getBlock() const { return m_body; }
 
+  void setBlock(BlockStmt * b) { m_body = b; }
+  void setParams(std::vector<Param *> p) { m_params = p; }
+
 protected:
   Type *m_returnType;
   std::vector<Param *> m_params;
