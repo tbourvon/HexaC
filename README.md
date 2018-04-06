@@ -1,6 +1,6 @@
 <div align="center">
 
-# HexaC - Compilateur langague C
+# HexaC - Compilateur langage C
 #### Hexanome H4312
 
 </div>
